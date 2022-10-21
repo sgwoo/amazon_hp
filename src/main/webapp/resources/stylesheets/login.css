@@ -1,0 +1,132 @@
+.login-box {
+	padding-top: 50px;
+	padding-bottom: 30px;
+	margin-bottom: 100px;
+	background-color: #ffffff;
+	border: 1px solid #b7bac0;
+}
+
+.login-title {
+	margin-top: 60px;
+	margin-bottom: 20px;
+}
+
+span.title {
+	/* font-family: AppleSDGothicNeoI-Regular; */
+	font-family: Noto Sans KR;
+	font-size: 18px;
+	color: #22b500;
+}
+
+.login-footer {
+	padding-top: 16px;
+	padding-left: 100px;
+	padding-bottom: 20px;
+}
+
+.header {
+	padding-top: 16px;
+	padding-left: 100px;
+	padding-bottom: 20px;
+	height: 61px;
+	margin: 10px 0px;
+}
+
+.form-box {
+	padding: 28px 100px;
+	height: 100%;
+	min-height: 379px;
+	border-top: 1px solid #ebebeb;
+	border-bottom: 1px solid #ebebeb;
+}
+
+.ic-social-btn {
+	font-size: 52px;
+	color: #969db0;
+	cursor: pointer;
+}
+
+label.form-label {
+	/* font-family: AppleSDGothicNeo-Regular; */
+	font-family: Noto Sans KR;
+	font-size: 14px;
+	color: #6c7382;
+	line-height: 22px;
+}
+
+span.link-label {
+	margin-top: 12px;
+	/* font-family: AppleSDGothicNeo-Regular; */
+	font-size: 14px;
+	color: #6c7382;
+	line-height: 22px;
+	text-decoration: underline;
+}
+
+.submit-btn {
+	background: #22b500;
+	border-radius: 2px;
+	width: 100%;
+	height: 60px;
+	/* font-family: AppleSDGothicNeo-Regular; */
+	font-family: Noto Sans KR;
+	font-size: 18px;
+	color: #ffffff;
+	line-height: 22px;
+}
+
+.submit-btn:hover, .submit-btn:focus {
+	color: #ffffff;
+}
+
+a.btn-social-icon {
+	width: 68px !important;
+	height: 68px !important;
+}
+
+i.fa {
+	font-size: 2.3em !important;
+	line-height: 65px !important;
+}
+
+.social-btn-area {
+	margin-top: 15px;
+}
+
+.social-btn-area a {
+	margin-left: 5px;
+}
+
+.fms-login {
+	position: relative;
+	float: right;
+	padding: 30px 18px;
+}
+
+.login-error {
+	margin-top: 10px;
+	text-align: center;
+	color: #22B500;
+	font-weight: bold;
+}
+
+.login-button {
+	width: 80px;
+	height: 80px;
+}
+
+.register-button {
+	margin-top: 20px;
+	width: 80px;
+	height: 80px;
+}
+
+.login-social {
+	margin-top: 10px;
+}
+
+.login-social-image {
+	padding: 10px 3px;
+}
+
+/*# sourceMappingURL=login.css.map */

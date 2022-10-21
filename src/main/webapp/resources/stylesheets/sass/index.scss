@@ -1,0 +1,574 @@
+@import 'variable';
+@import url(https://cdn.rawgit.com/hiun/NanumSquare/master/nanumsquare.css);
+
+$nav-hover-color:#FDB913;
+
+*{
+	font-family:Noto Sans KR,sans-serif;
+	font-weight:300;
+}
+
+body{
+	overflow-x:hidden;
+}
+
+h1,h2{
+	font-family:Noto Sans KR;
+	font-weight:lighter !important;
+}
+
+.container{
+	width:1280px;
+	padding-top:12px;
+}
+
+@media(min-width:900px){   .index-container { background-position-y:0px !important; }  }
+@media(min-width:1000px){  .index-container { background-position-y:-50px !important; }  }
+@media(min-width:1200px){  .index-container { background-position-y:-80px !important; }  }
+@media(min-width:1300px){  .index-container { background-position-y:-140px !important; }  }
+@media(min-width:1400px){  .index-container { background-position-y:-220px !important; }  }
+@media(min-width:1500px){  .index-container { background-position-y:-270px !important; }  }
+@media(min-width:1600px){  .index-container { background-position-y:-350px !important; }  }
+@media(min-width:1700px){  .index-container { background-position-y:-420px !important; }  }
+@media(min-width:1800px){  .index-container { background-position-y:-470px !important; }  }
+@media(min-width:1900px){  .index-container { background-position-y:-520px !important; }  }
+@media(min-width:2000px){  .index-container { background-position-y:-600px !important; }  }
+@media(min-width:2100px){  .index-container { background-position-y:-700px !important; }  }
+@media(min-width:2200px){  .index-container { background-position-y:-750px !important; }  }
+@media(min-width:2300px){  .index-container { background-position-y:-830px !important; }  }
+
+
+.nav-notice-detail{
+	background-color:#FCCA43;
+	height:360px;
+	padding:20px;
+	visibility:hidden;
+}
+
+.nav-notice{
+	background-image:url("../images/notice.png");
+	background-repeat:no-repeat;
+	background-position: 10px;
+	background-size:35px;
+    height: 60px;
+    background-color: #FCCA43;
+    color: #000;
+    padding:10px;
+    padding-left:70px;
+    margin-top:-60px;
+}
+
+.nav-notice.close{
+	display:none;
+}
+
+.nav-notice > span.date {
+	font-size:13px;
+}
+
+.carousel-indicators li{
+	width:16px;
+	height:16px;
+	margin-left:18px;
+}
+
+.carousel-indicators li.active{
+	width:16px;
+	height:16px;
+	margin-left:18px;
+}
+
+.title{
+	font-family: Noto Sans KR;
+	font-weight:500;
+}
+
+.index-container{
+	overflow-x:hidden;
+	height:850px;
+	background-image:url('../images/mainimg_s.png');
+	background-size:cover;
+	background-repeat:no-repeat;
+	background-position-y:-50px;
+	background-position-x:0px;
+}
+
+.header{
+	padding:12px 12px 22px 12px;
+	position:absolute;
+	width:100%;
+}
+
+.f-nav {
+	z-index:9999;
+	position:fixed;
+	left:0;
+	top:0;
+	width:100%;
+	background-color:#fff;
+	color:#646464 !important;
+	box-shadow:1px 1px 1px #ddd;
+}
+
+.f-nav-style{
+	color:#646464 !important;
+}
+
+.nav-call > a.f-nav-style, .nav-estimate > a.f-nav-style{
+	color:$brand-color !important;
+}
+
+img#amazoncarLogo{
+	width:150px;
+	position:fixed;
+}
+
+img#amazoncarLogo.scroll{
+	margin-top:-8px;
+}
+
+img#greenBanner{
+	margin-top:5px;
+	margin-left:170px;
+}
+
+img#minusMileageBanner{
+	margin-top:8px;
+	margin-left:170px;
+}
+
+@mixin common-menu{
+	padding:0;
+	display:inline;
+}
+
+ul.footer-menu{
+	@include common-menu;
+}
+
+ul.menu {
+	@include common-menu;
+}
+
+ul.menu-btn{
+	@include common-menu;
+	float:right;
+}
+
+ul.menu>li,ul.menu-btn>li,ul.footer-menu>li {
+    display: inline;
+}
+
+// jjlim modify
+ul.menu>li>a,ul.menu-btn>li>a {
+	font-size:18px;
+    color: white;
+    text-decoration:none;
+	padding:0px 15px;
+    //padding:0px 28px;
+    text-decoration: none;
+    font-weight:400;
+}
+
+ul.menu li a:hover,ul.menu-btn li a:hover{
+	color:$nav-hover-color;
+}
+
+.container.nav {
+	white-space: nowrap;
+}
+
+// jjlim add
+.nav-login > a {
+	color:$brand-color;
+	font-weight:bold;
+	font-size:15px !important;
+}
+
+ul.footer-menu li a{
+	color:#6c6c6c;
+	padding:0px 33px;
+	border-right:1px solid #a4a4a4;
+}
+
+ul.footer-menu li a.last{
+	border:0px;
+}
+
+.login-btn{
+	margin-top:-8px;
+	margin-left:30px;
+	font-size:15px;
+	padding:10px 20px;
+	background-color:transparent;
+	border:1px solid #ffffff;
+	color:#ffffff;
+}
+
+.login-btn:hover, .login-btn.hover{
+	padding:10px 20px;
+	background-color:transparent;
+	border:1px solid $nav-hover-color;
+	color:$nav-hover-color;
+}
+.dropdown > a:focus, .nav .open > a, .nav .open > a:hover, .nav .open > a:focus{
+	background-color:transparent !important;
+	color:$brand-color;
+}
+button.active{
+	background-color:transparent !important;
+	border:1px solid $brand-color !important;
+	color:$brand-color;
+}
+
+.text-slider{
+	text-align:center;
+	color:#fff;
+	top:120px;
+}
+
+.text-slider h1{
+	font-size:60px;
+}
+
+.text-slider hr{
+	width:284px;
+	height:2px;
+}
+.carousel-indicators{
+	margin:0 auto;
+	position:relative;
+	padding:61px 0px 81px;
+	left:-8px;
+	width:100%;
+	z-index:0;
+}
+.detail-btn{
+	color:#032841;
+	background-color:#fff;
+    padding: 13px 55px;
+    border-radius: 30px;
+    border-style: none;
+    font-size: 20px;
+    margin-top:31px;	
+}
+
+//custom icon 
+@font-face {
+    font-family: 'icomoon';
+    src:    url('../../../../fonts/icomoon.eot?xws1pw');
+    src:    url('../../../../fonts/icomoon.eot?xws1pw#iefix') format('embedded-opentype'),
+        url('../../../../fonts/icomoon.ttf?xws1pw') format('truetype'),
+        url('../../../../fonts/icomoon.woff?xws1pw') format('woff'),
+        url('../../../../fonts/icomoon.svg?xws1pw#icomoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+    /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: 'icomoon' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    font-size:40px;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-transport:before {
+    content: "\e900";
+    color:#fff;
+}
+.icon-database:before {
+    content: "\e901";
+    color:#fff;
+}
+.icon-trophy:before {
+    content: "\e902";
+    color:#fff;
+}
+.graphicon{
+	text-align:center;
+	width:800px;
+	margin:0 auto;
+	color:#fff;
+	top:180px;
+}
+
+.graphicon-section{
+	width:25%;
+	display:inline;
+	float:left;
+	font-size:18px;
+	position:relative;
+	top:60px;
+	z-index:2;
+}
+
+.graphicon-background{
+	border-radius: 100px;
+    width: 100%;
+    height: 150px;
+    background-color: #000;
+    position: relative;
+    z-index: 1;
+    opacity: 0.2;
+}
+
+.ic-title{
+	font-size:19px;
+	line-height:16px;
+	font-weight:600;
+}
+
+span.slider-detail{
+	font-size:18px;
+}
+
+.box{
+	border:1px solid #d3d3d3;
+	background-color:#fff;
+	box-shadow:0px 2px 4px 0px rgba(0,0,0,0.10);
+	width:230px;
+	height:288px;
+	float:left;
+	margin-right:20px;
+	margin-bottom:44px;
+	padding:18px;
+	font-family:Noto Sans KR;
+}
+
+.box span.title{
+	font-size:18px;
+}
+
+.box span.detail-link a{
+	font-size:10px;
+	color:#22b500;
+	float:right;
+	text-decoration:underline;
+	margin-top:6px;
+}
+
+.box-main{
+	height:191px;
+}
+
+.box-row{
+	margin-top:90px;
+	margin-bottom:90px;
+}
+
+.box-footer{
+	text-align:center;
+}
+
+@mixin box-detail($line-height){
+    font-size: 15px;
+    color: #666565;
+    letter-spacing: -0.61px;
+    line-height:$line-height;
+    text-align: justify;
+	
+}
+
+.box-detail-ulStyle{
+	@include box-detail(27px);
+}
+
+.box-detail-btn{
+	border:1px solid #fff;
+	border-radius:100px;
+	width:110px;
+	height:24px;
+	font-size:12px;
+	color:#6c7382;
+	background-color:#fff;
+}
+
+.box hr{
+	margin:10px 0px;
+}
+
+
+.testimonial{
+	background-color:#fff;
+	height:871px;
+	border-top:1px solid #b7bac0;
+}
+
+.testimonial-words{
+	text-align:center;
+	margin:40px 0px;
+	line-height:22px;
+}
+.testimonial-words p{
+	margin-top:12px;
+}
+span.words{
+	color:#000;
+	font-size:16px;
+	font-weight:bold;
+}
+span.star{
+	font-size:18px;
+	color:#f5a623;
+}
+span.client{
+	font-size:14px;
+	color:#9ea3ad;
+}
+
+hr.testimonial-bar{
+	color:#cbcbcb;
+	width:959px;
+	size:4px;
+}
+
+.testimonial-logo{
+	text-align:center;
+}
+
+.footer{
+	border-top:2px solid #cbcbcb;
+	height:200px;
+}
+
+.footer-menu{
+	width:1280px;
+	margin:0 auto;
+	height:70px;
+	font-size:15px;
+	padding-top:25px;
+	text-align:center;
+}
+
+.footer-brand{
+	padding-top:35px;
+	background-color:#636363;
+}
+
+.brand-info{
+	color:#fff;
+	font-size:15px;
+	width:1280px;
+	margin:0 auto;
+	height:150px;
+	line-height:25px;
+}
+
+/* amazon common glyphicon */
+@font-face {
+    font-family: 'amazon-glyph';
+    src:    url('https://www.amazoncar.co.kr/resources/fonts/amazon-glyph.eot?jvkm5b');
+    src:    url('https://www.amazoncar.co.kr/resources/fonts/amazon-glyph.eot?jvkm5b#iefix') format('embedded-opentype'),
+        url('https://www.amazoncar.co.kr/resources/fonts/amazon-glyph.ttf?jvkm5b') format('truetype'),
+        url('https://www.amazoncar.co.kr/resources/fonts/amazon-glyph.woff?jvkm5b') format('woff'),
+        url('https://www.amazoncar.co.kr/resources/fonts/amazon-glyph.svg?jvkm5b#amazon-glyph') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+    /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: 'amazon-glyph' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-brief:before {
+    content: "\e900";
+}
+.icon-throphy:before {
+    content: "\e901";
+}
+.icon-idea:before {
+    content: "\e902";
+}
+.icon-complain:before {
+    content: "\e903";
+}
+.icon-footer_logo:before {
+    content: "\e904";
+}
+.icon-car:before {
+    content: "\e905";
+}
+.icon-repair:before {
+    content: "\e906";
+}
+.icon-crash:before {
+    content: "\e907";
+}
+.icon-compare:before {
+    content: "\e908";
+}
+.icon-footer_sns1:before {
+    content: "\e909";
+}
+.icon-footer_sns2:before {
+    content: "\e90a";
+}
+.icon-question_1:before {
+    content: "\e90b";
+}
+.icon-question_2:before {
+    content: "\e90c";
+}
+.icon-email:before {
+    content: "\e90d";
+}
+.icon-mobile:before {
+    content: "\e90e";
+}
+.icon-arrow_up:before {
+    content: "\e90f";
+}
+.icon-arrow_down:before {
+    content: "\e910";
+}
+.icon-arrow_right:before {
+    content: "\e911";
+}
+.icon-arrow_left:before {
+    content: "\e912";
+}
+.icon-filter:before {
+    content: "\e913";
+}
+.icon-sns_naver:before {
+    content: "\e914";
+}
+.icon-sns_facebook:before {
+    content: "\e915";
+}
+.icon-sns_kakao:before {
+    content: "\e916";
+}
+.icon-sns_google:before {
+    content: "\e917";
+}
+.icon-capital:before {
+    content: "\e918";
+}
+.icon-notice:before {
+    content: "\e919";
+}
+
+#estimate-btn{
+	cursor:pointer;
+}

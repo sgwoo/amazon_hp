@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="utilMapper">
+
+	<select id="selectIdxToMessenger" resultType="int">
+		SELECT
+		CVIEW.ALERTKEY.NEXTVAL
+		<!-- AVIEW.ALERTKEY.NEXTVAL -->
+		FROM DUAL
+	</select>
+
+	<insert id="insertMessengerData" parameterType="hashmap">
+		<!-- INSERT INTO	AVIEW.CD_ALERT -->
+		INSERT INTO	CVIEW.CD_ALERT
+					(fldidx, flddata, fldtype,fldwritedate)
+			   VALUES (
+			   	 	#{idx}, #{xmlData}, #{type}, sysdate
+			   )
+	</insert>
+
+	<select id="companyMainInfo" resultType="hashmap">
+		<!-- SELECT 'HP_VAR' AS GUBUN, LISTAGG(VAR_SIK,';') WITHIN GROUP(ORDER BY VAR_CD) AS VAR
+  		  FROM ESTI_SIK_VAR
+         WHERE VAR_CD LIKE 'hp%' -->
+        SELECT a.var_sik AS var1, b.var_sik AS var2, c.var_sik AS var3, d.var_sik AS var4, e.var_sik AS var5
+   		  FROM (SELECT * FROM amazoncar.esti_sik_var WHERE VAR_CD LIKE 'hp_var1') a,
+      		   (SELECT * FROM amazoncar.esti_sik_var WHERE VAR_CD LIKE 'hp_var2') b,
+      		   (SELECT * FROM amazoncar.esti_sik_var WHERE VAR_CD LIKE 'hp_var3') c,
+      		   (SELECT * FROM amazoncar.esti_sik_var WHERE VAR_CD LIKE 'hp_var4') d,
+      		   (SELECT * FROM amazoncar.esti_sik_var WHERE VAR_CD LIKE 'hp_var5') e
+	</select>
+
+	<select id="companyMainInfo2" resultType="hashmap">
+		SELECT A_J       
+       	FROM amazoncar.ESTI_SIK_VAR
+       	WHERE VAR_CD LIKE 'hp_var1'
+	</select>
+	
+	<select id="companyMainInfo3" resultType="hashmap">       
+		SELECT
+			a.*, TRUNC(MONTHS_BETWEEN(SYSDATE, TO_DATE(a.open_year, 'YYYYMMDD'))/12, 0) AS CONTINUE_YEAR
+		FROM
+			amazoncar.CLIENT a
+		WHERE
+			a.client_id = '000228'
+	</select>
+	
+	<select id="getBlockIp" resultType="String">
+		SELECT 
+			IP
+		FROM 
+			amazoncar.MOBILEIPBLOCK
+		WHERE
+		(
+			name LIKE '%'||#{estName}||'%'
+			<if test="estEmail != null and estEmail != ''"> OR email LIKE '%'||#{estEmail}||'%' </if>
+		)
+		AND rownum = 1
+		<!-- <if test="estName != null and estName != ''">  </if> -->
+	</select>
+
+</mapper>

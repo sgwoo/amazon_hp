@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="memberMapper">
+
+	<select id="getUserInfo" parameterType="hashmap" resultType="hashmap">
+        <![CDATA[
+            SELECT
+            	*
+            FROM
+                amazoncar.MOBILE_MEMBER
+            WHERE
+            	EMAIL = #{email}
+        ]]>
+	</select>
+
+	<update id="updateUserInfo" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			BIRTH = #{birth},
+    			C_NAME = #{name},
+    			TO_EMAIL = #{toEmail},
+    			TEL = #{tel}
+    		WHERE 
+    			EMAIL = #{email}
+    	]]>
+
+	</update>
+
+	<update id="updateProviderInfo" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			PROVIDER = #{provider}
+    		   ,USE_YN = 'Y' 
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+	</update>
+	
+	<update id="updateProviderInfoforNoEmail" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			PROVIDER = #{provider}
+    		   ,USE_YN = 'Y'
+    		   ,FB_ID = #{email} 
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+	</update>
+	
+	<update id="updateProviderInfoforNoEmailKakao" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			PROVIDER = #{provider}
+    		   ,USE_YN = 'Y'
+    		   ,KAKAO_ID = #{email} 
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+	</update>
+
+	<insert id="insertComplainInfo" parameterType="hashmap">
+    	<![CDATA[
+			INSERT INTO amazoncar.OPINION (SEQ, GUBUN, NAME, TEL, EMAIL, HP_KEY, ACAR_USE, TITLE, CONTENTS, REG_DT)
+			SELECT MAX(SEQ)+1,
+				   'C',
+				   #{name},
+				   #{tel},
+				   #{email},
+				   #{hpKey},
+				   #{acar_use},
+				   #{title},
+				   #{content},
+				   sysdate
+			FROM amazoncar.OPINION
+    	]]>
+	</insert>
+
+	<select id="selectComplainList" parameterType="String"
+		resultType="hashmap">
+    	<![CDATA[
+    		SELECT
+    			SEQ,
+    			GUBUN,
+    			EMAIL,
+    			NAME,
+    			TEL,
+    			ACAR_USE,
+    			TITLE,
+    			CONTENTS,
+    			TO_CHAR(REG_DT,'YYYY-MM-DD') AS REG_DT,
+    			ANSWER,
+    			ANS_ID,
+    			TO_CHAR(ANS_DT,'YYYY-MM-DD') AS ANS_DT
+    		FROM 
+    			amazoncar.OPINION
+    		WHERE
+    			HP_KEY = #{email}
+    		ORDER BY
+    			SEQ DESC
+    	]]>
+	</select>
+
+	<update id="updateTokenInfo" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			REGID = #{token}
+    		WHERE
+    			EMAIL = #{email}    		
+    	]]>
+	</update>
+
+	<insert id="insertEmailInfo" parameterType="com.amazon.hp.member.util.user.UserEmailFormatter">
+    	<![CDATA[
+    		INSERT INTO
+    			amazoncar.IM_DMAIL_INFO_8
+    			(SEQIDX,
+    			 SUBJECT,
+    			 SQL,
+    			 REJECT_SLIST_IDX,
+    			 BLOCK_GROUP_IDX,
+    			 MAILFROM,
+    			 MAILTO,
+    			 REPLYTO,
+    			 ERRORSTO,
+    			 HTML,
+    			 ENCODING,
+    			 CHARSET,
+    			 SDATE,
+    			 TDATE,
+    			 DURATION_SET,
+    			 CLICK_SET,
+    			 SITE_SET,
+    			 ATC_SET,
+    			 GUBUN,    			 
+    			 RNAME,
+    			 MTYPE,
+    			 U_IDX,
+    			 G_IDX,
+    			 MSGFLAG,
+    			 CONTENT)
+    		VALUES (
+   				amazoncar.IM_SEQ_DMAIL_INFO_8.NEXTVAL,
+   				#{subject},#{sql},#{rejectSlistIdx},#{blockGroupIdx},
+   				#{mailFrom}, #{mailTo}, #{replyTo}, #{errorsTo},
+   				#{html}, #{encoding}, #{charset}, to_char(sysdate,'YYYYMMDDhh24miss'), to_char(sysdate+7,'YYYYMMDDhh24miss'),
+   				#{durationSet}, #{clickSet}, #{siteSet}, #{atcSet},
+   				#{gubun}, #{rName}, #{mType}, #{uIdx}, #{gIdx}, #{msgFlag}, #{content}
+    		)
+    	]]>
+	</insert>
+
+	<update id="updatePassword" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET 
+    			REGID = null,
+    			PASSWD = #{password}
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+	</update>
+
+	<select id="selectToken" parameterType="hashmap" resultType="String">    	
+    	<![CDATA[
+    		SELECT  EMAIL
+    		FROM	 amazoncar.MOBILE_MEMBER
+    		WHERE   PASSWD = #{token}
+    	]]>
+	</select>
+
+	<select id="selectTokenForEmailAuth" parameterType="hashmap"
+		resultType="String">
+    	<![CDATA[
+    		SELECT  EMAIL
+    		FROM 	amazoncar.MOBILE_MEMBER
+    		WHERE   REGID = #{token}
+    	]]>
+	</select>
+
+	<select id="selectEstimateList" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM
+			(SELECT ROWNUM AS RNUM, z.* FROM				
+				(
+				SELECT a.EST_ID,
+				       c.CAR_NM,
+				       d.CAR_NO,
+				       b.CAR_NAME,
+				       CASE WHEN b.AUTO_YN = 'Y' THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'자동변속기') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'무단변속기') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(a.OPT,' ',''),'변속기') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'DCT') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'C-TECH') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'A/T') >0 THEN '오토'
+				            ELSE '수동'
+				       END AUTO,
+				       DECODE(b.diesel_yn,'Y','디젤','1','휘발유','2','LPG','3','하이브리드','4','플로그하이브리드','5','전기차') FUEL,
+				       DECODE(a.MGR_NM,'','신차',DECODE(a.MGR_SSN,'rm1','월렌트','재리스')) ESTI_TYPE,
+				       a.RENT_DT,
+				       a.REG_DT,
+				       a.FEE_S_AMT,
+				       DECODE(f.DAMDANG_ID,'',b2.BR_NM,b1.BR_NM) br_nm,
+				       DECODE(f.DAMDANG_ID,'',j.USER_NM,i.USER_NM) user_nm,
+				       DECODE(f.CAR_MNG_ID,'',DECODE(e.EST_ID,'','견적','상담요청'),DECODE(g.RENT_L_CD,'','예약','계약')) ESTI_STAT,
+				       a.EST_EMAIL,
+				       f.USE_YN,
+				       f.CAR_MNG_ID,
+				       f.SEQ		       
+				FROM   amazoncar.ESTIMATE_CU a,
+				       amazoncar.CAR_NM b,
+				       amazoncar.CAR_MNG c,
+				       amazoncar.CAR_REG d,
+				       amazoncar.ESTI_SPE e,
+				       amazoncar.SH_RES f,
+				       amazoncar.CONT_ETC g,
+				       (SELECT a.* FROM amazoncar.esti_m a, (SELECT EST_ID, MAX(SEQ_NO) SEQ_NO FROM amazoncar.ESTI_M GROUP BY EST_ID) b
+				        WHERE a.EST_ID=b.EST_ID AND a.SEQ_NO=b.SEQ_NO) h,
+				       amazoncar.USERS i,
+				       amazoncar.USERS j,
+				       amazoncar.BRANCH b1,
+				       amazoncar.BRANCH b2
+				WHERE  
+					   a.CAR_ID=b.CAR_ID 
+					   AND a.CAR_SEQ=b.CAR_SEQ
+				       AND a.car_comp_id=c.car_comp_id 
+				       AND a.car_cd=c.code
+				       AND a.mgr_nm=d.car_mng_id(+)
+				       AND a.est_id=e.est_id(+)
+				       AND a.est_id=f.est_id(+) 
+				       AND a.reg_code=f.reg_code(+)
+				       AND a.est_id=g.spe_est_id(+)
+				       AND a.est_id=h.est_id(+)
+				       AND f.DAMDANG_ID=i.user_id(+)
+				       AND h.user_id=j.user_id(+)
+				       AND i.br_id=b1.br_id(+)
+				       AND j.br_id=b2.br_id(+)
+				       AND NVL(a.job,'org')='org'
+				       AND a.fee_s_amt NOT IN ('-1', '0')
+				       AND (a.use_yn IS NULL OR a.use_yn = 'Y')	<!-- 20180410 -->
+				       AND a.reg_dt >= TO_CHAR(sysdate-180,'YYYYMMDD')<!-- 20180823 -->
+				       AND a.hp_key = #{email}
+			       <if test="searchText != null and searchText !=''">
+				       AND ((c.CAR_NM LIKE CONCAT('%'||#{searchText},'%')) OR (b.CAR_NAME LIKE CONCAT('%'||#{searchText},'%'))) 
+				   </if>
+				   <if test="esti_type != null and esti_type !=''">
+		   	    	   AND DECODE(a.MGR_NM,'','신차',DECODE(a.MGR_SSN,'rm1','월렌트','재리스')) = #{esti_type}
+				   </if>
+				   <if test="esti_stat != null and esti_stat !=''">
+				       AND DECODE(f.CAR_MNG_ID,'',DECODE(e.EST_ID,'','견적','상담요청'),DECODE(g.RENT_L_CD,'','예약','계약')) = #{esti_stat}
+				   </if>			       
+				 ORDER BY a.REG_DT DESC      
+				)
+		<![CDATA[	
+			z WHERE ROWNUM <= #{endnum}
+		)WHERE RNUM >= #{startnum}
+		]]> 
+		
+	</select>
+	
+	<select id="selectEstimateListCnt" parameterType="hashmap" resultType="Integer">		
+		SELECT COUNT(*) 
+			FROM(	
+				<![CDATA[
+				SELECT a.EST_ID,
+				       c.CAR_NM,
+				       d.CAR_NO,
+				       b.CAR_NAME,
+				       CASE WHEN b.AUTO_YN = 'Y' THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'자동변속기') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'무단변속기') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(a.OPT,' ',''),'변속기') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'DCT') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'C-TECH') >0 THEN '오토'
+				            WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'A/T') >0 THEN '오토'
+				            ELSE '수동'
+				       END AUTO,
+				       DECODE(b.diesel_yn,'Y','디젤','1','휘발유','2','LPG','3','하이브리드','4','플로그하이브리드','5','전기차') FUEL,
+				       DECODE(a.MGR_NM,'','신차',DECODE(a.MGR_SSN,'rm1','월렌트','재리스')) ESTI_TYPE,
+				       a.RENT_DT,
+				       a.REG_DT,
+				       a.FEE_S_AMT,
+				       DECODE(f.DAMDANG_ID,'',b2.BR_NM,b1.BR_NM) br_nm,
+				       DECODE(f.DAMDANG_ID,'',j.USER_NM,i.USER_NM) user_nm,
+				       DECODE(f.CAR_MNG_ID,'',DECODE(e.EST_ID,'','견적','상담요청'),DECODE(g.RENT_L_CD,'','예약','계약')) ESTI_STAT,
+				       a.EST_EMAIL,
+				       f.USE_YN,
+				       f.CAR_MNG_ID,
+				       f.SEQ		       
+				FROM   amazoncar.ESTIMATE_CU a,
+				       amazoncar.CAR_NM b,
+				       amazoncar.CAR_MNG c,
+				       amazoncar.CAR_REG d,
+				       amazoncar.ESTI_SPE e,
+				       amazoncar.SH_RES f,
+				       amazoncar.CONT_ETC g,
+				       (SELECT a.* FROM amazoncar.esti_m a, (SELECT EST_ID, MAX(SEQ_NO) SEQ_NO FROM amazoncar.ESTI_M GROUP BY EST_ID) b
+				        WHERE a.EST_ID=b.EST_ID AND a.SEQ_NO=b.SEQ_NO) h,
+				       amazoncar.USERS i,
+				       amazoncar.USERS j,
+				       amazoncar.BRANCH b1,
+				       amazoncar.BRANCH b2
+				WHERE  a.CAR_ID=b.CAR_ID AND a.CAR_SEQ=b.CAR_SEQ
+				       AND a.car_comp_id=c.car_comp_id AND a.car_cd=c.code
+				       AND a.mgr_nm=d.car_mng_id(+)
+				       AND a.est_id=e.est_id(+)
+				       AND a.est_id=f.est_id(+) AND a.reg_code=f.reg_code(+)
+				       AND a.est_id=g.spe_est_id(+)
+				       AND a.est_id=h.est_id(+)
+				       AND f.DAMDANG_ID=i.user_id(+)
+				       AND h.user_id=j.user_id(+)
+				       AND i.br_id=b1.br_id(+)
+				       AND j.br_id=b2.br_id(+)
+				       AND NVL(a.job,'org')='org'
+				       AND a.fee_s_amt NOT IN ('-1', '0')
+				]]>
+				       AND (a.use_yn IS NULL OR a.use_yn = 'Y')	<!-- 20180410 -->
+				       AND a.reg_dt >= TO_CHAR(sysdate-180,'YYYYMMDD')<!-- 20180823 -->	
+				       AND a.hp_key = #{email}				       
+			   <if test="searchText != null and searchText !=''">
+			        AND ((c.CAR_NM LIKE CONCAT('%'||#{searchText},'%')) OR (b.CAR_NAME LIKE CONCAT('%'||#{searchText},'%')))  
+			   </if>
+			   <if test="esti_type != null and esti_type !=''">
+	   	    		AND DECODE(a.MGR_NM,'','신차',DECODE(a.MGR_SSN,'rm1','월렌트','재리스')) = #{esti_type}
+			   </if>
+			   <if test="esti_stat != null and esti_stat !=''">
+			        AND DECODE(f.CAR_MNG_ID,'',DECODE(e.EST_ID,'','견적','상담요청'),DECODE(g.RENT_L_CD,'','예약','계약')) = #{esti_stat}
+			   </if>
+			    
+		       )
+		      									
+	</select>
+	
+	<!-- <select id="selectEstimateList" parameterType="String"
+		resultType="hashmap">
+        <![CDATA[
+        SELECT
+               a.EST_ID,
+               c.CAR_NM,
+               d.CAR_NO,
+               b.CAR_NAME,
+               CASE WHEN b.AUTO_YN = 'Y' THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'자동변속기') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'무단변속기') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(a.OPT,' ',''),'변속기') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'DCT') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'C-TECH') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'A/T') >0 THEN '오토'
+                    ELSE '수동'
+               END AUTO,
+               DECODE(b.diesel_yn,'Y','디젤','1','휘발유','2','LPG','3','하이브리드','4','플로그하이브리드','5','전기차') FUEL,
+               DECODE(a.MGR_NM,'','신차',DECODE(a.MGR_SSN,'rm1','월렌트','재리스')) ESTI_TYPE,
+               a.RENT_DT,
+               a.REG_DT,
+               a.FEE_S_AMT,
+               DECODE(f.DAMDANG_ID,'',b2.BR_NM,b1.BR_NM) br_nm,
+               DECODE(f.DAMDANG_ID,'',j.USER_NM,i.USER_NM) user_nm,
+               DECODE(f.CAR_MNG_ID,'',DECODE(e.EST_ID,'','견적','상담요청'),DECODE(g.RENT_L_CD,'','예약','계약')) ESTI_STAT,
+               a.EST_EMAIL
+        FROM   ESTIMATE_CU a,
+               CAR_NM b,
+               CAR_MNG c,
+               CAR_REG d,
+               ESTI_SPE e,
+               SH_RES f,
+               CONT_ETC g,
+               (SELECT a.* FROM esti_m a, (SELECT EST_ID, MAX(SEQ_NO) SEQ_NO FROM ESTI_M GROUP BY EST_ID) b
+                WHERE a.EST_ID=b.EST_ID AND a.SEQ_NO=b.SEQ_NO) h,
+               USERS i,
+               USERS j,
+               BRANCH b1,
+               BRANCH b2
+        WHERE  a.CAR_ID=b.CAR_ID AND a.CAR_SEQ=b.CAR_SEQ
+               AND a.car_comp_id=c.car_comp_id AND a.car_cd=c.code
+               AND a.mgr_nm=d.car_mng_id(+)
+               AND a.est_id=e.est_id(+)
+               AND a.est_id=f.est_id(+) AND a.reg_code=f.reg_code(+)
+               AND a.est_id=g.spe_est_id(+)
+               AND a.est_id=h.est_id(+)
+               AND f.DAMDANG_ID=i.user_id(+)
+               AND h.user_id=j.user_id(+)
+               AND i.br_id=b1.br_id(+)
+               AND j.br_id=b2.br_id(+)
+               AND NVL(a.job,'org')='org'
+               and a.est_email = #{email}
+        ORDER BY a.REG_DT DESC
+        ]]>
+	</select> -->
+
+	<!-- 로그인 위한 비번 체크 추가(2017.05.15) -->
+	<select id="checkPassword" resultType="Integer">
+
+		SELECT COUNT(*)
+		FROM amazoncar.MOBILE_MEMBER
+		WHERE EMAIL = #{username}
+		AND PASSWD = #{password}
+	</select>
+
+	<!-- 이메일 인증 성공시 유저의 상태값 변경 -->
+	<update id="updateUseYn" parameterType="String">
+    
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET 
+    			USE_YN = 'Y',
+    			REGID = null    			
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+	</update>
+
+	<!-- 로그인시 use_yn 상태값 체크 -->
+	<select id="selectUseYn" parameterType="String" resultType="Integer">
+
+		SELECT COUNT(*) AS checkCnt
+		  FROM amazoncar.MOBILE_MEMBER
+		  WHERE EMAIL = #{email}
+		    AND USE_YN = 'Y'
+	</select>
+
+	<!-- 이메일 인증을 위한 토큰 생성 -->
+	<update id="updateEmailToken" parameterType="hashmap">
+    
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET 
+    			REGID = #{token}    			
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+	</update>
+	
+	<!--  회원가입 여부 체크 -->
+	<select id="checkRegEmail" parameterType="hashmap" resultType="Integer">
+	
+		SELECT COUNT(*)
+		 
+			FROM amazoncar.MOBILE_MEMBER 
+			
+			WHERE EMAIL = #{email} 
+	
+	</select>
+	
+	<select id="selectEstimateOne" parameterType="String" resultType="hashmap">
+        <![CDATA[
+        SELECT
+               a.EST_ID,
+               c.CAR_NM,
+               d.CAR_NO,
+               b.CAR_NAME,
+               CASE WHEN b.AUTO_YN = 'Y' THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'자동변속기') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(b.CAR_B,' ',''),'무단변속기') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(a.OPT,' ',''),'변속기') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'DCT') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'C-TECH') >0 THEN '오토'
+                    WHEN b.AUTO_YN = 'N' AND INSTR(REPLACE(UPPER(a.OPT),' ',''),'A/T') >0 THEN '오토'
+                    ELSE '수동'
+               END AUTO,
+               DECODE(b.diesel_yn,'Y','디젤','1','휘발유','2','LPG','3','하이브리드','4','플로그하이브리드','5','전기차') FUEL,
+               DECODE(a.MGR_NM,'','신차',DECODE(a.MGR_SSN,'rm1','월렌트','재리스')) ESTI_TYPE,
+               a.RENT_DT,
+               a.REG_DT,
+               a.FEE_S_AMT,
+               DECODE(f.DAMDANG_ID,'',b2.BR_NM,b1.BR_NM) br_nm,
+               DECODE(f.DAMDANG_ID,'',j.USER_NM,i.USER_NM) user_nm,
+               DECODE(f.CAR_MNG_ID,'',DECODE(e.EST_ID,'','견적','상담요청'),DECODE(g.RENT_L_CD,'','예약','계약')) ESTI_STAT,
+               a.EST_EMAIL
+        FROM   amazoncar.ESTIMATE_CU a,
+               amazoncar.CAR_NM b,
+               amazoncar.CAR_MNG c,
+               amazoncar.CAR_REG d,
+               amazoncar.ESTI_SPE e,
+               amazoncar.SH_RES f,
+               amazoncar.CONT_ETC g,
+               (SELECT a.* FROM amazoncar.esti_m a, (SELECT EST_ID, MAX(SEQ_NO) SEQ_NO FROM amazoncar.ESTI_M GROUP BY EST_ID) b
+                WHERE a.EST_ID=b.EST_ID AND a.SEQ_NO=b.SEQ_NO) h,
+               amazoncar.USERS i,
+               amazoncar.USERS j,
+               amazoncar.BRANCH b1,
+               amazoncar.BRANCH b2
+        WHERE  a.CAR_ID=b.CAR_ID AND a.CAR_SEQ=b.CAR_SEQ
+               AND a.car_comp_id=c.car_comp_id AND a.car_cd=c.code
+               AND a.mgr_nm=d.car_mng_id(+)
+               AND a.est_id=e.est_id(+)
+               AND a.est_id=f.est_id(+) AND a.reg_code=f.reg_code(+)
+               AND a.est_id=g.spe_est_id(+)
+               AND a.est_id=h.est_id(+)
+               AND f.DAMDANG_ID=i.user_id(+)
+               AND h.user_id=j.user_id(+)
+               AND i.br_id=b1.br_id(+)
+               AND j.br_id=b2.br_id(+)
+               AND NVL(a.job,'org')='org'
+               and a.est_id = #{estimateId}        
+        ]]>
+	</select>
+	
+	<select id="checkFacebookId" parameterType="String" resultType="String">
+	
+		SELECT EMAIL FROM amazoncar.MOBILE_MEMBER WHERE FB_ID = #{facebookId}
+	
+	</select>
+	
+	<update id="updateFacebookId" parameterType="String">
+		
+		UPDATE amazoncar.MOBILE_MEMBER 
+			SET FB_ID = #{facebookId}
+			WHERE EMAIL = #{facebookId} 
+	
+	</update>
+	
+	<update id="updateEmailInfo" parameterType="hashmap">
+	
+		UPDATE amazoncar.MOBILE_MEMBER
+			SET TEL = #{tel}
+			WHERE EMAIL = #{email}
+			
+	</update>
+	
+	<update id="updateEmailInfoForFb" parameterType="hashmap">
+	
+		UPDATE amazoncar.MOBILE_MEMBER
+			SET EMAIL = #{email}
+			WHERE FB_ID = #{fbId}
+			
+	</update>
+	
+	<update id="updateEmailInfoForKakao" parameterType="hashmap">
+	
+		UPDATE amazoncar.MOBILE_MEMBER
+			SET EMAIL = #{email}
+			WHERE KAKAO_ID = #{kakaoId}
+			
+	</update>
+	
+	<select id="selectEmailInfo" parameterType="String" resultType="String">
+	
+		SELECT TEL 
+			FROM amazoncar.MOBILE_MEMBER 
+			WHERE EMAIL = #{email}
+	
+	</select>
+	
+	<update id="updateRealEmail" parameterType="String">
+	
+		UPDATE amazoncar.MOBILE_MEMBER
+			SET EMAIL = #{realEmail}
+			   ,TEL = ''
+			   ,USE_YN = 'Y'
+			WHERE TEL = #{realEmail}   
+	
+	</update>
+	
+	<select id="checkUseYnForFb" parameterType="String" resultType="String">
+		
+		SELECT USE_YN 
+			FROM amazoncar.MOBILE_MEMBER 
+			WHERE FB_ID = #{email}
+	
+	</select>
+	
+	<!-- 예약 취소 -->	
+	<update id="cancelReservation" statementType="CALLABLE" parameterType="hashmap">
+	
+		{ call amazoncar.P_SH_RES_DIRE_CANCEL
+			(
+				#{CAR_MNG_ID, mode=IN, jdbcType=VARCHAR, javaType=string},
+				#{SEQ, mode=IN, jdbcType=VARCHAR, javaType=string},
+				#{R_CHK, mode=OUT, jdbcType=VARCHAR, javaType=string}
+			)
+		}
+		
+	</update>
+	
+	<!-- 회원탈퇴 -->
+	<delete id="withdrawMember" parameterType="String">
+		
+		DELETE FROM amazoncar.MOBILE_MEMBER
+		 
+			WHERE EMAIL = #{email}			  
+	
+	</delete>
+	
+	<!-- 페이스북 이메일없이 로그인시 회원가입여부 체크 -->
+	<select id="checkFbLoginMember" parameterType="hashmap" resultType="Integer">
+	
+		SELECT COUNT(*) FROM amazoncar.MOBILE_MEMBER
+			WHERE EMAIL = #{fb_email}
+			   OR FB_ID = #{fb_id}	
+			   	
+	</select>
+	
+	<!-- 페이스북 이메일없이 로그인시 인증절차 걸쳤는지 체크 -->
+	<select id="authEmailForFbLogin" parameterType="hashmap" resultType="hashmap">
+	
+		SELECT EMAIL, USE_YN 
+			FROM amazoncar.MOBILE_MEMBER			
+			WHERE FB_ID = #{fb_id}
+	
+	</select>
+	
+	<!-- 카카오 이메일없이 로그인시 회원가입여부 체크 -->
+	<select id="checkKakaoLoginMember" parameterType="hashmap" resultType="Integer">
+	
+		SELECT COUNT(*) FROM amazoncar.MOBILE_MEMBER
+			WHERE EMAIL = #{kakao_email}
+			   OR KAKAO_ID = #{kakao_id}	
+			   	
+	</select>
+	
+	<!-- 카카오 이메일없이 로그인시 인증절차 걸쳤는지 체크 -->
+	<select id="authEmailForKakaoLogin" parameterType="hashmap" resultType="hashmap">
+	
+		SELECT EMAIL, USE_YN 
+			FROM amazoncar.MOBILE_MEMBER			
+			WHERE KAKAO_ID = #{kakao_id}
+	
+	</select>
+	
+	<!-- 기존 고객(고객FMS에 등록된)인지 체크-->
+	<select id="selectClientId" parameterType="hashmap" resultType="String">
+		<if test="gubun2 == 3"> <!-- 개인인 경우 -->
+			<!-- SELECT CLIENT_ID 
+				  FROM CLIENT 
+				 WHERE (	con_agnt_email=#{estEmail} 
+				 		 OR replace(m_tel,'-','')=replace(#{estTel},'-',''))
+	               AND replace(firm_nm,' ','')=replace(#{estName},' ','')
+	               AND client_st='2' -->
+	               
+	               <!-- AND substr(text_decrypt(ssn, 'pw'),1,6)=#{estSSN} -->	               
+	        SELECT client_id
+			FROM
+				(SELECT a.*
+				 FROM amazoncar.CLIENT a
+				 WHERE (con_agnt_email=#{estEmail}
+				        OR replace(m_tel, '-', '')=replace(#{estTel}, '-', ''))
+				   AND replace(firm_nm, ' ', '')=replace(#{estName}, ' ', '')
+				   AND client_st='2'
+				 ORDER BY a.reg_dt DESC)
+			WHERE rownum = 1
+		</if>
+		<if test="gubun2 != 3"> <!-- 법인, 개인사업자인 경우 -->
+			SELECT CLIENT_ID 
+				  FROM amazoncar.CLIENT 
+				 WHERE client_st!='2'
+	               AND enp_no=replace(#{estSSN},'-','')
+		</if>
+	</select>
+	
+	<!-- 마이페이지 견적리스트에서 견적건 사용안함 처리 -->
+	<update id="deleteMyEstimate" parameterType="hashmap">
+    		UPDATE amazoncar.ESTIMATE_CU
+    		   SET USE_YN = 'N'
+    		 WHERE EST_ID = #{estimatedId}
+	</update>
+</mapper>

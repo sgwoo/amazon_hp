@@ -1,0 +1,1423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rentMapper">
+
+	<select id="selectMonthCarList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			* 
+		FROM 
+			amazoncar.V_MMRENT 
+		WHERE 1=1
+	   	<if test="region != null and region != 'All'">
+	   	<![CDATA[ 	
+	   	and decode(park,'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','12','J1','13','G1', nvl(mng_br_id,brch_id)) = #{region} 	
+	   	]]>
+	   	</if>
+	   	<!-- <if test="carGubun eq '1'.toString()">	and jg_code between '4111' and '4999' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') 	</if>
+	    <if test="carGubun eq '2'.toString()">	and jg_code between '3111' and '3999' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') 	</if>
+       	<if test="carGubun eq '3'.toString()">	and jg_code between '1111' and '2999' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용')	</if>
+       	<if test="carGubun eq '4'.toString()">	and jg_code between '4111' and '4999' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용')	</if>
+       	<if test="carGubun eq '5'.toString()">	and ( jg_code between '1111' and '2999' OR jg_code between '3111' and '3999' ) and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd in  ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용')		</if>
+       	<if test="carGubun eq '6'.toString()">	and jg_code between '5111' and '9999' and car_comp_id in ('0001','0002','0003','0004','0005')	</if> -->
+	   	<if test="carGubun eq '1'.toString()"> and jg_code like '4%' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+       	<if test="carGubun eq '2'.toString()"> and jg_code like '3%' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+       	<if test="carGubun eq '3'.toString()"> and jg_code between '1000000' and '2999999' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+       	<if test="carGubun eq '4'.toString()"> and jg_code like '4%' and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+       	<if test="carGubun eq '5'.toString()"> and ( jg_code between '1000000' and '2999999' OR jg_code like '3%' ) and car_comp_id in ('0001','0002','0003','0004','0005') and fuel_kd in  ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+       	<if test="carGubun eq '6'.toString()"> and jg_code between '5000000' and '9999999' and car_comp_id in ('0001','0002','0003','0004','0005') </if>
+       	<if test="carGubun eq '7'.toString()"> and car_comp_id not in ('0001','0002','0003','0004','0005') </if>
+       	<if test="carGubun eq 'green'.toString()"> and fuel_kd in ('전기', '수소', '휘발유+전기') </if>
+       	<if test="carStatus eq '1'.toString()"> and st1 = '즉시가능' </if>
+       	<if test="carStatus eq '2'.toString()"> and st1 = '3일이내' </if>
+       	ORDER BY 
+        	decode(car_comp_id, '0001',0, '0002',0, '0003',0, '0004',0, '0005',0, 1), 
+        	decode(fuel_kd, '3',0, '5',0, '6',0, 1),
+        	jg_code, init_reg_dt, car_mng_id
+	</select>
+	
+    <select id="selectMonthCarList-old" parameterType="hashmap" resultType="hashmap">
+    	/* --월렌트 차량 리스트 */
+		SELECT 
+       		/* 사진 */
+       		d.content_seq, d.save_folder, d.save_file as imgfile6,        
+       		case when c.jg_code like '4%' and c.car_comp_id in ('0001','0002','0003','0004','0005') then '대형' 
+	       		when c.jg_code like '3%' and c.car_comp_id in ('0001','0002','0003','0004','0005') then '중형'
+	       		when c.jg_code between '1000000' and '2999999' and c.car_comp_id in ('0001','0002','0003','0004','0005') then '소형/경차'
+	       		/* when c.jg_code like '4%' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd not in ('3','5','6') then '대형(가솔린)'  
+	            when c.jg_code like '3%' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd not in ('3','5','6') then '중형(가솔린/디젤)'
+	            when c.jg_code between '1000000' and '2999999' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd not in ('3','5','6') then '소형/경차(가솔린/디젤)'
+	            when c.jg_code like '4%' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd in ('3','5','6') then '대형(LPG)'
+	            when c.jg_code between '1000000' and '2999999' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd in ('3','5','6') then '중형/소형(LPG)'
+	            when c.jg_code like '3%' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd in ('3','5','6') then '중형/소형(LPG)' */
+	            when c.jg_code between '5000000' and '9999999' and c.car_comp_id in ('0001','0002','0003','0004','0005') then 'RV'
+	            when c.car_comp_id not in ('0001','0002','0003','0004','0005') then '수입차'
+	       		else '' 
+	       	end car_type,     
+       		c.car_name, /* 차명 */
+       		'*** '||SUBSTR(b.car_no,-4) ab_car_no, --약식차량번호 
+       		decode(b.fuel_kd,'1','휘발유','2','휘발유(무연)','3','LPG','4','경유','5','휘발유+LPG겸용','6','휘발유(무연)+LPG겸용','7','휘발유+전기') fuel_kd, --연료
+       		C.COL,      /* 색상 */
+       		substr(b.init_reg_dt,1,4)||'년'||substr(b.init_reg_dt,5,2)||'월' as init_reg_dt, --신차등록년월
+       		f.real_km,  /* 주행거리 */
+       		/* 지역 */
+       		decode(NVL(p.park_id,b.park),'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','10','S1','12','J1','13','G1','14','J1', nvl(n.mng_br_id,a.brch_id)) br_id,       
+       		decode(decode(NVL(p.park_id,b.park),'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','10','S1','12','J1','13','G1','14','J1', nvl(n.mng_br_id,a.brch_id)),'S1','수도권','D1','대전','G1','대구','J1','광주','B1','부산') br_nm,
+       		f.rm1,      /* 월대여료 공급가 */
+       		b.car_mng_id, /* 차량관리번호 */     
+       		a.rent_mng_id, a.rent_l_cd, /* 계약관리번호,계약번호 */  
+       		/* 즉시가능,3일이내 */    
+       	<![CDATA[
+       		case 
+       			when a.car_st='2' and g.situation is null and p.car_mng_id is not null and a.car_st='2' and b.off_ls not in ('1','3') and h.car_mng_id is null and i.car_mng_id is null and nvl(b.rm_st,'0')<>'3' then '즉시가능'
+            	when decode(a.car_st,'4',to_char(to_date(r.use_e_dt,'YYYYMMDD')-3,'YYYYMMDD'), to_char(sysdate,'YYYYMMDD')) <= to_char(sysdate,'YYYYMMDD') then '3일이내'
+       			else '' 
+       		end st1,
+       		/* 상담중 */
+       		decode(g.situation,'0','상담중','') st2, g.res_end_dt as st2_end_dt,       
+       		/* 대차중 */
+       		case 
+       			when a.car_st='2' and (h.car_mng_id is not null or i.car_mng_id is not null) then '대차중' 
+       			else '' 
+       		end st3,       
+       		case 
+       			when a.car_st='2' and h.car_mng_id is not null then substr(h.ret_plan_dt,1,8) 
+       			when i.car_mng_id is not null then substr(i.ret_plan_dt,1,8)  
+       			else '' 
+       		end st3_end_dt,
+       		/* 정비요 */
+       		case 
+       			when a.car_st='2' and b.rm_st='3' and h.car_mng_id is null and i.car_mng_id is null then '정비요' 
+       			else '' 
+       		end st4,
+       		/* 정비중 */
+       		case 
+       			when a.car_st='2' and g.situation is null and nvl(h.rent_st,i.rent_st)='6' and nvl(b.RM_ST,'-')<>'3' then '정비중'
+            	when a.car_st='2' and g.situation is null and h.car_mng_id is null and i.car_mng_id is null and nvl(b.RM_ST,'-')<>'3' and p.car_mng_id is null then '정비중' 
+       			else '' 
+       		end st5,
+       		/* 대여중 */
+       		decode(a.car_st,'4','대여중','') st6, r.use_e_dt as st6_end_dt         
+	  	FROM   
+	  		amazoncar.CONT a, amazoncar.CAR_REG b, amazoncar.SH_BASE c, amazoncar.CONT_ETC n, amazoncar.PARK_CONDITION p,
+			(select * from amazoncar.secondhand a where a.seq = (select max(seq) from amazoncar.secondhand where car_mng_id=a.car_mng_id and rm1 > 0  )) f, --재리스견적정보
+       		(select * from amazoncar.sh_res a     where a.use_yn='Y') g, --차량예약정보                                                    
+       		(SELECT rent_mng_id, rent_l_cd, max(use_e_dt) use_e_dt FROM amazoncar.scd_fee WHERE bill_yn='Y' GROUP BY rent_mng_id, rent_l_cd) r, --대여정보
+	   		(select * from amazoncar.rent_cont a  where a.use_st = '2' and a.rent_st<>'11') h, --배차
+	   		(select * from amazoncar.rent_cont a  where a.use_st = '1' and a.rent_st<>'11') i, --예약
+       		(select SUBSTR(content_seq,1,6) car_mng_id, content_seq, save_folder, save_file  from amazoncar.ACAR_ATTACH_FILE where content_code='APPRSL' and SUBSTR(content_seq,7,1) = '1'  and isdeleted = 'N' ) d --사진
+       	]]>        
+		WHERE  
+			a.car_st IN ('2','4') 
+			and a.use_yn='Y' 
+       		and a.car_mng_id=b.car_mng_id 
+       		and b.car_use='1'                          /* 영업용 */ 			 
+	   		<![CDATA[	
+	   		and nvl(b.rm_yn, 'Y') <> 'N'				        /* 월렌트 비대상 */	
+	   		]]>
+	   		and nvl(b.off_ls,'0') in ('0')		          /* 출품전까지 20100126 */
+       		and nvl(b.prepare,'0') in('0','1','2','7') /* 예비차량,매각예정차량,재리스비대상 (보류차량,말소차량,도난차량,경매,수해차량 제외) */
+			and b.car_mng_id=c.car_mng_id
+			and a.rent_mng_id=n.rent_mng_id 
+			and a.rent_l_cd=n.rent_l_cd
+			and b.car_mng_id=p.car_mng_id(+)       
+			and b.car_mng_id=f.car_mng_id
+			and b.car_mng_id=g.car_mng_id(+) 
+			and nvl(g.situation,'-') not in ('2') /* 계약확정 제외 */
+			and a.rent_mng_id=r.rent_mng_id(+) 
+			and a.rent_l_cd=r.rent_l_cd(+)
+			and b.car_mng_id=h.car_mng_id(+)
+			and b.car_mng_id=i.car_mng_id(+)
+       		and b.car_mng_id=i.car_mng_id(+)
+       		and b.car_mng_id=d.car_mng_id(+)
+       		<![CDATA[ 	
+       		and decode(nvl(h.rent_st,i.rent_st),'',to_char(sysdate,'YYYYMMDD'),to_char(to_date(substr(h.ret_plan_dt,1,8),'YYYYMMDD')-3,'YYYYMMDD')) <= to_char(sysdate,'YYYYMMDD') /* 3일이내 대차종료인 차량포함 */		
+       		]]>
+       		<if test="region != null and region != 'All'">
+       		<![CDATA[ 	
+       		and decode(b.park,'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','12','J1','13','G1', nvl(n.mng_br_id,a.brch_id)) = #{region} 		
+       		]]>
+       		</if>
+       		<if test="carGubun eq '1'.toString()"> and c.jg_code like '4%' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '2'.toString()"> and c.jg_code like '3%' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '3'.toString()"> and c.jg_code between '1000000' and '2999999' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '4'.toString()"> and c.jg_code like '4%' and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd in ('3','5','6') </if>
+			<if test="carGubun eq '5'.toString()"> and ( c.jg_code between '1000000' and '2999999' OR c.jg_code between '3111' and '3999' ) and c.car_comp_id in ('0001','0002','0003','0004','0005') and b.fuel_kd in ('3','5','6') </if>
+			<if test="carGubun eq '6'.toString()"> and c.jg_code between '5000000' and '9999999' and c.car_comp_id in ('0001','0002','0003','0004','0005') </if>
+			<if test="carGubun eq '7'.toString()"> and c.car_comp_id not in ('0001','0002','0003','0004','0005') </if>
+			<if test="carStatus eq '1'.toString() ">
+			/* 즉시가능 차량 */
+       		<![CDATA[
+       		and a.car_st='2' and g.situation is null and p.car_mng_id is not null and a.car_st='2' and b.off_ls not in ('1','3') 
+       		and h.car_mng_id is null and i.car_mng_id is null and nvl(b.rm_st,'0')<>'3'		
+       		and decode(nvl(a.use_yn,'Y')||a.car_st||a.rent_start_dt,'Y4','N','Y')='Y'
+       		]]>
+       		</if>
+       		<if test="carStatus eq '2'.toString() ">
+       		/* 3일이내 가능 차량 */
+       		<![CDATA[
+       		and decode(a.car_st,'4',to_char(to_date(r.use_e_dt,'YYYYMMDD')-3,'YYYYMMDD'), to_char(sysdate,'YYYYMMDD')) <= to_char(sysdate,'YYYYMMDD')
+       		]]>
+       		</if>
+		ORDER BY 
+			decode(c.car_comp_id, '0001',0, '0002',0, '0003',0, '0004',0, '0005',0, 1),
+			decode(b.fuel_kd, '3',0, '5',0, '6',0, 1),
+	     	c.jg_code, c.car_name, b.init_reg_dt, b.car_mng_id 
+    </select>
+    
+    <select id="selectMonthCarDetail" parameterType="hashmap" resultType="hashmap">
+   	<![CDATA[
+		SELECT 
+			/*+use_hash(d c)*/ s.rm1, s.max_use_mon, s.lsmax, s.lbmax, s.rsmax, s.rbmax,
+			s.lb12, s.lb18, s.lb24, s.lb30, s.lb36, s.lb42, s.lb48,
+			s.ls12, s.ls18, s.ls24, s.ls30, s.ls36, s.ls42, s.ls48,
+			s.rb1,  s.rb2,  s.rb3,  s.rb4,  s.rb5,  s.rb6,  s.rb7,  s.rb8,  s.rb9, s.rb10, s.rb11, s.rb12, s.rb18, s.rb24, s.rb30, s.rb36, s.rb42, s.rb48,
+			s.rs1,  s.rs2,  s.rs3,  s.rs4,  s.rs5,  s.rs6,  s.rs7,  s.rs8,  s.rs9, s.rs10, s.rs11, s.rs12, s.rs18, s.rs24, s.rs30, s.rs36, s.rs42, s.rs48,
+			
+			s.lb12_id, s.lb24_id, s.lb36_id, s.lbmax_id,
+			s.ls12_id, s.ls24_id, s.ls36_id, s.lsmax_id,        
+			s.rb6_id,  s.rb12_id, s.rb24_id, s.rb36_id, s.rbmax_id,
+			s.rs6_id,  s.rs12_id,  s.rs24_id, s.rs36_id, s.rsmax_id,
+			
+   			s.LB36_AG, s.LB24_AG, s.LB12_AG, s.LBMAX_AG, 
+   			s.LS36_AG, s.LS24_AG, s.LS12_AG, s.LSMAX_AG,
+			s.RB36_AG, s.RB24_AG, s.RB12_AG, s.RB6_AG, s.RBMAX_AG,
+   			s.RS36_AG, s.RS24_AG, s.RS12_AG, s.RS6_AG, s.RSMAX_AG,
+   			s.RM1_AG,
+			
+			s.real_km, s.apply_sh_pr, b.car_id, b.car_seq, g.car_comp_id, h.car_nm car_jnm, g.car_name car_nm, g.car_cd, '*** '||SUBSTR(a.car_no,-4) car_no, a.car_no as car_no_r,  b.ex_gas, a.car_kd as car_kd_cd,
+			decode(a.car_kd,'1','대형승용','2','중형승용','3','소형승용','4','중형승합','5','소형승합','6','소형화물','7','중형화물') car_kd,
+			substr(a.init_reg_dt,3,2)||'/'||substr(a.init_reg_dt,5,2) yearmon, substr(a.init_reg_dt,1,4) year,
+			a.dpm, a.car_use, a.car_num, b.colo, substr(a.init_reg_dt,1,4)||'년 '||substr(a.init_reg_dt,5,2)||'월 '||substr(a.init_reg_dt,7,2)||'일' init_reg_dt, e.dlv_dt,
+			decode(a.fuel_kd,'1','휘발유','2','휘발유(무연)','3','LPG','4','경유','5','휘발유+LPG겸용','6','휘발유(무연)+LPG겸용','7','휘발유+전기') fuel_kd, a.fuel_kd as fuel_code, 
+			s.real_km, a.car_y_form,  
+			c.km as today_dist,
+			g.car_b, b.opt,  g.car_b_inc_id, g.car_b_inc_seq,  decode(b.lpg_yn,'Y','장착','N','미장착') lpg_yn, 
+			d.hp_pr, (b.car_cs_amt+b.car_cv_amt) car_amt, (b.opt_cs_amt+b.opt_cv_amt) opt_amt, (b.clr_cs_amt+b.clr_cv_amt) clr_amt,
+			(b.car_cs_amt+b.car_cv_amt+b.opt_cs_amt+b.opt_cv_amt+b.clr_cs_amt+b.clr_cv_amt) tot_amt,
+			c.ass_chk, c.ass_st_dt, c.ass_ed_dt, c.ass_st_km, c.ass_ed_km, decode(c.lpg_yn,'1','있음','0','없음','2','탈거','없음') lpg_yn,
+			c.imgfile1, c.imgfile2, c.imgfile3, c.imgfile4, c.imgfile5, NVL(h2.save_file, c.imgfile6) imgfile6, h2.save_folder, 
+			s.UPLOAD_DT, s.reg_code, a.dist_cng, q.nm as CAR_COMP_NM,
+			/* 지역 */
+			decode(NVL(pk.park_id,a.park),'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','10','S1','12','J1','13','G1','14','J1', nvl(re.mng_br_id,e.brch_id)) br_id,       
+			decode(decode(NVL(pk.park_id,a.park),'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','10','S1','12','J1','13','G1','14','J1', nvl(re.mng_br_id,e.brch_id)),'S1','수도권','D1','대전','G1','대구','J1','광주','B1','부산') br_nm
+		FROM    
+			amazoncar.car_reg a, amazoncar.car_etc b, amazoncar.apprsl c, amazoncar.cont e, amazoncar.car_nm g, amazoncar.CAR_MNG h, amazoncar.CONT_ETC re, amazoncar.PARK_CONDITION pk,
+			(SELECT a.car_mng_id CAR_MNG_ID, a.seq SEQ, a.actn_st ACTN_ST, a.damdang_id DAMDANG_ID, a.hp_pr HP_PR, a.st_pr ST_PR FROM amazoncar.auction a WHERE a.seq = (select max(seq) from amazoncar.auction where car_mng_id = a.car_mng_id)) d, 				
+			(select a.car_mng_id CAR_MNG_ID, a.serv_dt SERV_DT, a.tot_dist TOT_DIST  from amazoncar.service a where a.serv_id = (select max(serv_id) from amazoncar.service where car_mng_id = a.car_mng_id)) i, 
+			(select SUBSTR(content_seq,1,6) car_mng_id, content_seq, save_folder, save_file  from amazoncar.ACAR_ATTACH_FILE where content_code='APPRSL' AND isdeleted = 'N') h2 , 
+			(select * from amazoncar.secondhand a where a.seq = (select max(seq) from amazoncar.secondhand where rm1>0 and reg_code is not null and car_mng_id=a.car_mng_id)  ) s, amazoncar.code q  
+		WHERE
+			a.car_mng_id=#{carManagedId} 
+			and nvl(e.use_yn,'Y')='Y' 
+			and a.car_mng_id=e.car_mng_id 
+			and e.rent_l_cd=b.rent_l_cd
+			and a.car_mng_id=c.car_mng_id(+)
+			and a.car_mng_id=d.car_mng_id(+)
+			and a.car_mng_id=i.car_mng_id(+)
+			and a.car_mng_id=h2.car_mng_id(+) 
+   			and a.car_mng_id=pk.car_mng_id(+)
+       		and b.rent_mng_id=re.rent_mng_id 
+       		and b.rent_l_cd=re.rent_l_cd(+)						
+			and b.car_id=g.car_id 
+			and b.car_seq=g.car_seq 
+			and g.car_comp_id=h.car_comp_id 
+			and g.car_cd=h.code  
+			and a.car_mng_id=s.car_mng_id 
+			and q.c_st = '0001' 
+   			and q.code = g.car_comp_id
+			and b.rent_mng_id=#{rentManagedId}
+			and b.rent_l_cd=#{rentLocationCode}
+			and rownum = 1
+   	]]>
+   	<!-- (select SUBSTR(content_seq,1,6) car_mng_id, content_seq, save_folder, save_file  from ACAR_ATTACH_FILE where content_code='APPRSL' AND SUBSTR(content_seq,7,1) = '5' AND isdeleted = 'N') h2 , -->
+    </select>
+    
+    <select id="selectParentSpec" parameterType="String" resultType="hashmap">
+   	<![CDATA[
+   		SELECT 
+   			CAR_NAME, CAR_B, CAR_B_INC_ID, CAR_B_INC_SEQ
+   			, (SELECT car_name FROM amazoncar.car_nm WHERE car_id = a.car_b_inc_id AND car_seq = a.car_b_inc_seq) SUB_CAR_NAME
+   		FROM 
+   			amazoncar.CAR_NM a
+   		WHERE 
+   			CAR_ID = #{parentCarId}
+   			AND CAR_SEQ = #{parentCarSeq, jdbcType=VARCHAR}
+   	]]>
+    </select>
+    
+    <select id="selectCarHistory" parameterType="String" resultType="hashmap">
+   	<![CDATA[
+   		SELECT 
+   		 	decode(d.client_st,'2','개인고객', a.firm_nm) firm_nm, to_char(to_date(a.reg_dt,'YYYYMMDD')+1, 'YYYYMMDD') reg_dt,
+   		 	c.rent_start_dt, a.rent_end_dt, nvl(b.mgr_title,'중역') mgr_title, cc.cls_st, cc.cls_dt
+		FROM   
+		 	amazoncar.cont_n_view a, amazoncar.car_mgr b, amazoncar.fee c, amazoncar.client d, amazoncar.cls_cont cc
+		WHERE  
+		 	a.rent_mng_id=b.rent_mng_id and a.rent_l_cd=b.rent_l_cd and b.mgr_st='차량이용자'
+			and a.rent_mng_id=c.rent_mng_id and a.rent_l_cd=c.rent_l_cd and c.rent_st='1'
+			and a.rent_mng_id=cc.rent_mng_id(+) and a.rent_l_cd=cc.rent_l_cd(+)
+			and a.client_id=d.client_id
+			and a.car_mng_id=#{carManagedId}
+			and a.firm_nm <> '(주)아마존카'
+		ORDER BY  a.reg_dt
+   	]]>
+    </select>
+    
+	<select id="selectAcciHistory" parameterType="String" resultType="hashmap">
+	<![CDATA[
+		SELECT  
+			b.ACCID_DT,s.tot_amt,s.SERV_ST,LISTAGG(si.ITEM,',') WITHIN GROUP (ORDER BY si.ITEM) AS ITEM
+		FROM    
+			amazoncar.cont_n_view a, amazoncar.accident b, amazoncar.client e , amazoncar.car_reg cr , amazoncar.service s, amazoncar.serv_item si
+		WHERE   
+			a.car_mng_id=b.car_mng_id 
+			and a.rent_mng_id=b.rent_mng_id 
+			and a.rent_l_cd=b.rent_l_cd
+			and a.car_mng_id=s.car_mng_id 
+			and a.rent_mng_id=s.rent_mng_id 
+			and a.rent_l_cd=s.rent_l_cd 
+			and b.accid_id=s.accid_id
+        	and s.CAR_MNG_ID=si.CAR_MNG_ID 
+        	and s.SERV_ID=si.SERV_ID
+			and a.car_mng_id = cr.car_mng_id 
+			and b.car_mng_id like #{carManagedId}
+			and a.client_id=e.client_id-- 
+         	and si.SEQ_NO<6
+         GROUP BY b.ACCID_DT, s.TOT_AMT, s.SERV_ST--,item
+         ORDER BY b.accid_dt
+	]]>
+	</select>
+	
+	<select id="selectServHistory" parameterType="String" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			a.car_mng_id AS CAR_MNG_ID, a.serv_id AS SERV_ID,
+        	b.off_nm OFF_NM, A.TOT_DIST, A.REG_DT,
+        	CASE 
+        		WHEN a.serv_st = '1' THEN '순회점검'
+             	WHEN a.serv_st = '2' THEN '일반수리'
+             	WHEN a.serv_st = '3' THEN '보증수리'
+             	WHEN a.serv_st = '4' THEN '운행자차'
+             	WHEN a.serv_st = '5' THEN '사고자차'
+             	WHEN a.serv_st = '7' THEN '재리스정비'
+             	ELSE ''
+            END AS SERV_ST,
+        	LISTAGG(C.ITEM,',') WITHIN GROUP (ORDER BY C.ITEM) AS ITEM
+		FROM 
+			amazoncar.service a, amazoncar.serv_off b, amazoncar.SERV_ITEM c   
+ 		WHERE 
+ 			a.car_mng_id=#{carManagedId}
+       		AND a.serv_dt IS NOT NULL
+       		AND a.off_id=b.off_id(+)
+       		AND a.CAR_MNG_ID = c.CAR_MNG_ID
+       		AND a.SERV_ID = c.SERV_ID
+       		AND C.SEQ_NO < 6 --ITEM 양 갯수 제한
+		GROUP BY A.CAR_MNG_ID, A.SERV_ID, B.OFF_NM, A.TOT_DIST, A.REG_DT, SERV_ST
+	]]>
+	</select>
+	
+	<select id="selectDomsticRentListForSearch" parameterType="hashmap" resultType="hashmap">
+		<!-- SELECT DISTINCT CAR_NM, CAR_CD, COM_NM
+		  FROM MAIN_CAR 
+		 WHERE O_1 > 0 -->
+		<choose>
+			<when test="mode eq 'rent'">
+				SELECT 
+					DISTINCT COM_NM, CAR_COMP_ID, AB_NM
+				FROM 
+					amazoncar.MAIN_CAR
+				WHERE 
+					O_1 > 0
+			</when>
+			<otherwise>
+				SELECT 
+					DISTINCT COM_NM, CAR_COMP_ID, AB_NM
+				FROM 
+					amazoncar.MAIN_CAR
+				WHERE 
+					O_1 > 0
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="companyName != null and companyName != ''">
+				AND car_comp_id = #{companyName}
+			</when>
+			<otherwise>
+				AND car_comp_id in ('0001','0002','0003','0004','0005')
+			</otherwise>
+		</choose>
+		<if test="mode eq 'rent'"> AND rb36_amt > -1 AND (rb36_amt+rs36_amt) > 0 </if>
+		<if test="mode eq 'lease'"> AND LB36_AMT + LB36_AMT2 > -1 </if>
+		<if test="carGubun eq '3'.toString()"> AND CAR_KIND = '중형승용' </if>
+		<if test="carGubun eq '12'.toString()"><![CDATA[ AND (CAR_KIND IN ('경승용', '소형승용') OR jg_code IN ('5011111', '5011112') ) AND DIESEL <> 'LPG' ]]></if>
+		<if test="carGubun eq '30'.toString()"><![CDATA[ AND car_kind = '중형승용' and DIESEL <> 'LPG' ]]></if>
+		<if test="carGubun eq '3L'.toString()"> AND car_kind in ('중형승용', '소형승용') AND DIESEL = 'LPG' </if>
+		<if test="carGubun eq '4'.toString()"> AND car_kind = '대형승용' </if>
+		<if test="carGubun eq '40'.toString()"><![CDATA[ AND car_kind = '대형승용' AND DIESEL <> 'LPG' ]]></if>
+		<if test="carGubun eq '4L'.toString()"> AND car_kind = '대형승용' AND DIESEL = 'LPG' </if>
+		<if test="carGubun eq '8'.toString()"> AND car_kind not in ('경승용', '소형승용', '중형승용', '대형승용', '승합', '화물') </if>
+		<if test="carGubun eq '9'.toString()"> AND car_kind in ('승합', '화물') </if>
+		<if test="carGubun eq 'green'.toString()"> AND JG_G_7 IN (1, 2, 3, 4) </if>
+		<if test="dpmMin != null"><![CDATA[ AND DPM > #{dpmMin} ]]></if>
+		<if test="dpmMax != null"><![CDATA[ AND DPM <= #{dpmMax} ]]></if>
+		<!-- ORDER BY jg_g_34, DECODE(com_nm, '현대',1 ,'기아', 2, '삼성', 3,'한국GM', 4, '쌍용',5 ), car_nm -->
+		<choose>
+			<when test="mode eq 'rent'">
+				<!-- ORDER BY DECODE(com_nm, '현대', 1 ,'기아', 2, '한국GM(쉐보레)', 3, '쌍용', 4, '삼성', 5), DECODE(jg_g_34, '0', 0, '1', 1, '2', 1, '12', 1, 0) DESC, car_nm -->
+				<!-- ORDER BY DECODE(car_comp_id, '0001', 0, '0002', 1, '0004', 2, '0005', 3, '0003', 4, 5), DECODE(jg_g_34, '0', 0, '1', 1, '2', 1, '12', 1, 0) DESC, car_nm -->
+				ORDER BY DECODE(car_comp_id, '0001', 0, '0002', 1, '0004', 2, '0005', 3, '0003', 4, 5), ab_nm
+			</when>
+			<otherwise>
+				<!-- ORDER BY DECODE(com_nm, '현대', 1 ,'기아', 2, '한국GM(쉐보레)', 3, '쌍용', 4, '삼성', 5), DECODE(jg_g_35, '0', 0, '1', 1, '2', 1, '12', 1, 0) DESC, car_nm -->
+				<!-- ORDER BY DECODE(car_comp_id, '0001', 0, '0002', 1, '0004', 2, '0005', 3, '0003', 4, 5), DECODE(jg_g_35, '0', 0, '1', 1, '2', 1, '12', 1, 0) DESC, car_nm -->
+				ORDER BY DECODE(car_comp_id, '0001', 0, '0002', 1, '0004', 2, '0005', 3, '0003', 4, 5), ab_nm
+			</otherwise>
+		</choose>
+	</select>	
+	
+	<select id="selectDomesticFuelKdListForSearch" parameterType="hashmap" resultType="hashmap">		
+		SELECT
+			DISTINCT fuel_kd, DECODE(fuel_kd, 'Y', '경유', '1', '휘발유', '2', 'LPG', '3', '휘발유(하이브리드)', '4', '휘발유+전기(PHEV)', '5', '전기', '6', '수소') AS fuel_kd_nm
+		FROM amazoncar.MAIN_CAR
+          	WHERE O_1 > 0
+		<choose>
+			<when test="companyName != null and companyName != ''">
+				AND car_comp_id = #{companyName}
+			</when>
+			<otherwise>
+				AND car_comp_id in ('0001', '0002', '0003', '0004', '0005')
+			</otherwise>
+		</choose>
+		<if test="mode eq 'rent'"> AND rb36_amt > -1 AND (rb36_amt+rs36_amt) > 0 </if>
+		<if test="mode eq 'lease'"> AND LB36_AMT + LB36_AMT2 > -1 </if>
+		<if test="carGubun eq '12'.toString()">AND CAR_KIND IN ('경승용', '소형승용') </if>
+		<if test="carGubun eq '3'.toString()"> AND CAR_KIND =   '중형승용' </if>
+		<if test="carGubun eq '4'.toString()"> AND car_kind = '대형승용' </if>
+		<if test="carGubun eq '8'.toString()"> AND car_kind not in ('경승용', '소형승용', '중형승용', '대형승용', '승합', '화물') </if>
+		<if test="carGubun eq '9'.toString()"> AND car_kind in ('승합', '화물') </if>
+		<if test="carGubun eq 'green'.toString()"> AND JG_G_7 IN (1, 2, 3, 4) </if>
+		<!-- <if test="carGubun eq '12'.toString()"><![CDATA[ AND CAR_KIND IN ('경승용', '소형승용') AND DIESEL <> 'LPG' ]]> </if> -->
+<!-- 		<if test="carGubun eq '30'.toString()"><![CDATA[ AND car_kind = '중형승용' and DIESEL <> 'LPG'	]]> </if> -->
+<!-- 		<if test="carGubun eq '3L'.toString()"> AND car_kind in ('중형승용', '소형승용') AND DIESEL = 'LPG' </if> -->
+<!-- 		<if test="carGubun eq '40'.toString()"><![CDATA[ AND car_kind = '대형승용' AND DIESEL <> 'LPG' ]]> </if> -->
+<!-- 		<if test="carGubun eq '4L'.toString()"> AND car_kind = '대형승용' AND DIESEL = 'LPG' </if> -->
+		<if test="dpmMin != null"><![CDATA[ AND DPM > #{dpmMin} ]]></if>
+		<if test="dpmMax != null"><![CDATA[ AND DPM <= #{dpmMax} ]]></if>
+  		ORDER BY DECODE(fuel_kd, '1', '0', 'Y', '1', '2', '2', '3', '3', '4', '4', '5', '5', '6', '6')
+	</select>
+	
+	<select id="selectDomesticRentList" parameterType="hashmap" resultType="hashmap">
+			SELECT *
+			FROM amazoncar.MAIN_CAR
+			WHERE 
+				o_1>0
+				AND agree_dist = #{agreeDist}
+				AND rb36_amt > -1 AND (rb36_amt+rs36_amt) > 0
+			<choose>
+				<when test="companyName != null and companyName != ''">
+					AND car_comp_id = #{companyName}
+				</when>
+				<otherwise>
+					AND car_comp_id in ('0001','0002','0003','0004','0005','0055')
+				</otherwise>
+			</choose>
+			<if test="carGubun eq '12'.toString()"> AND ( CAR_KIND IN ('경승용', '소형승용') OR jg_code IN ('5011111', '5011112') )</if>
+			<if test="carGubun eq '3'.toString()"> AND CAR_KIND = '중형승용' </if>
+			<if test="carGubun eq '4'.toString()"> AND car_kind = '대형승용' </if>
+			<if test="carGubun eq '8'.toString()"> AND car_kind not in ('경승용','소형승용','중형승용','대형승용','승합','화물') </if>
+			<if test="carGubun eq '9'.toString()"> AND car_kind in ('승합','화물') </if>
+			<if test="carGubun eq 'green'.toString()"> AND JG_G_7 IN (1,2,3,4) </if>
+			<!-- <if test="carGubun eq '30'.toString()"><![CDATA[ AND car_kind = '중형승용' and DIESEL <> 'LPG'	]]></if>
+			<if test="carGubun eq '3L'.toString()"> AND car_kind in ('중형승용','소형승용') AND DIESEL = 'LPG' </if>
+			<if test="carGubun eq '40'.toString()"><![CDATA[ AND car_kind = '대형승용' AND DIESEL <> 'LPG' ]]></if>
+			<if test="carGubun eq '4L'.toString()"> AND car_kind = '대형승용' AND DIESEL = 'LPG' </if> -->
+			<!-- <if test="carName != null"> AND CAR_NM LIKE '%' || #{carName} || '%' </if> -->
+			<if test='carName != null and carName != "" '> AND AB_NM = #{carName} </if>
+			<!-- <if test="fuelKd != null and fuelKd != ''"> AND fuel_kd LIKE '%' || #{fuelKd} || '%' </if> -->
+			<if test=" fuelKd != null and fuelKd != '' ">
+				<choose>
+					<when test=" fuelKd eq '5'.toString() ">AND fuel_kd in ('5', '6')</when>
+					<otherwise> AND fuel_kd = #{fuelKd} </otherwise>
+				</choose> 
+			</if>
+			<if test="srchPrice eq '36-20'"><![CDATA[ AND RB36_AMT >= 200000 AND RB36_AMT < 300000 		]]></if>
+			<if test="srchPrice eq '36-30'"><![CDATA[		AND RB36_AMT >= 300000 AND RB36_AMT < 400000 		]]></if>
+			<if test="srchPrice eq '36-40'"><![CDATA[		AND RB36_AMT >= 400000 AND RB36_AMT < 500000 		]]></if>
+			<if test="srchPrice eq '36-50'"><![CDATA[		AND RB36_AMT >= 500000 AND RB36_AMT < 600000 		]]></if>
+			<if test="srchPrice eq '36-60'"><![CDATA[		AND RB36_AMT >= 600000 AND RB36_AMT < 700000 		]]></if>
+			<if test="srchPrice eq '36-70'"><![CDATA[		AND RB36_AMT >= 700000 AND RB36_AMT < 1000000 		]]></if>
+			<if test="srchPrice eq '36-100'"><![CDATA[		AND RB36_AMT >= 1000000 		]]></if>
+			<if test="srchPrice eq '48-20'"><![CDATA[		AND RB48_AMT >= 200000 AND RB48_AMT < 300000 		]]></if>
+			<if test="srchPrice eq '48-30'"><![CDATA[		AND RB48_AMT >= 300000 AND RB48_AMT < 400000 		]]></if>
+			<if test="srchPrice eq '48-40'"><![CDATA[		AND RB48_AMT >= 400000 AND RB48_AMT < 500000 		]]></if>
+			<if test="srchPrice eq '48-50'"><![CDATA[		AND RB48_AMT >= 500000 AND RB48_AMT < 600000 		]]></if>
+			<if test="srchPrice eq '48-60'"><![CDATA[		AND RB48_AMT >= 600000 AND RB48_AMT < 700000 		]]></if>
+			<if test="srchPrice eq '48-70'"><![CDATA[		AND RB48_AMT >= 700000 AND RB48_AMT < 1000000 		]]></if>
+			<if test="srchPrice eq '48-100'"><![CDATA[		AND RB48_AMT >= 1000000 		]]></if>
+			<if test="srchPrice eq '60-20'"><![CDATA[		AND RB60_AMT >= 200000 AND RB60_AMT < 300000 		]]></if>
+			<if test="srchPrice eq '60-30'"><![CDATA[		AND RB60_AMT >= 300000 AND RB60_AMT < 400000 		]]></if>
+			<if test="srchPrice eq '60-40'"><![CDATA[		AND RB60_AMT >= 400000 AND RB60_AMT < 500000 		]]></if>
+			<if test="srchPrice eq '60-50'"><![CDATA[		AND RB60_AMT >= 500000 AND RB60_AMT < 600000 		]]></if>
+			<if test="srchPrice eq '60-60'"><![CDATA[		AND RB60_AMT >= 600000 AND RB60_AMT < 700000 		]]></if>
+			<if test="srchPrice eq '60-70'"><![CDATA[		AND RB60_AMT >= 700000 AND RB60_AMT < 1000000 		]]></if>
+			<if test="srchPrice eq '60-100'"><![CDATA[		AND RB60_AMT >= 1000000 		]]></if>
+
+			ORDER BY DECODE(jg_g_34, '0', 0, '1', 1, '2', 1, '12', 1, 0) DESC, 
+			<!-- DECODE(jg_code, '4149', 0, '4150', 0, '6255', 1, '6256', 1, '7241', 1, '7242', 1, '5271', 2, '5272', 2, '5273', 2, '5274', 2, '6271', 2, '6272', 2, '4115', 3, '4116', 3, '4117', 3, '4118', 3, '5171', 3, '6161', 3, '5172', 3, '5173', 3, '3276', 4, '3277', 4, '3278', 4, '3279', 4, 5), -->  
+			<!-- DECODE(jg_code, '4016311', 0, '4016312', 0, '6024411', 1, '6024412', 1, '7024411', 1, '7024412', 1, '6022410', 2, '6022415', 2, '6022411', 3, '6022412', 3, '6022413', 3, '6022414', 3, '6022416', 3, '6022417', 3, '4012621', 4, '4012622', 4, '4012623', 4, '4012624', 4, '6018111', 4, '6018116', 4, '6018112', 4, '6018113', 4, '3023311', 5, '3023312', 5, '3023313', 5, '3023314', 5, 6), -->  
+			DECODE(jg_code, '3016111', 0, '5027111', 1, '5027112', 1, '4016311', 2, '4016312', 2, '6024411', 3, '6024412', 3, '7024411', 3, '7024412', 3, '4022311', 4, '4022312', 4, '4022313', 4, '4022314', 4, '4012621', 5, '4012622', 5, '4012623', 5, '4012624', 5, '6018111', 5, '6018116', 5, '6018112', 5, '6018113', 5, '3023311', 6, '3023312', 6, '3023313', 6, '3023314', 6, 7),  
+			<!-- substr(DECODE(jg_code, '6220', '6219', '4134', '4127', '5454', '5453', '9120', '9119', '6230', '6219', jg_code), 1, 3), --> 
+			DECODE(jg_code, '6022317', '6022316', '4012516', '4012512', '5044113', '5044114', '9014222', '9014221', '6022318', '6022316', jg_code), 
+			CAR_NM, DECODE(duty_free_opt, '1', 1, '0', 2, 4), jg_code, decode(diesel, '휘발유', 1, '경유', 2, 3), o_1, car_name
+	</select>
+	
+	<select id="selectDomesticLeaseList" parameterType="hashmap" resultType="hashmap">
+			SELECT * 
+			FROM amazoncar.MAIN_CAR
+			WHERE o_1>0
+			  AND agree_dist = #{agreeDist}
+			  AND LB36_AMT + LB36_AMT2 > -1
+		    <![CDATA[ AND (duty_free_opt <> '1' OR duty_free_opt IS null)  ]]>	<!-- 면세가표기차량은 리스트에서 제외(20190503) -->
+			<choose>
+				<when test="companyName != null and companyName != ''">
+					AND car_comp_id = #{companyName}
+				</when>
+				<otherwise>
+					AND car_comp_id in ('0001', '0002', '0003', '0004', '0005')
+				</otherwise>
+			</choose>
+			<if test="carGubun eq '12'.toString()">AND ( CAR_KIND IN ('경승용', '소형승용') OR jg_code IN ('5011111', '5011112') ) </if>
+			<if test="carGubun eq '3'.toString()"> AND CAR_KIND = '중형승용' </if>
+			<if test="carGubun eq '4'.toString()"> AND car_kind = '대형승용'	</if>
+			<if test="carGubun eq '8'.toString()"> AND ( car_kind not in ('경승용','소형승용','중형승용','대형승용','승합','화물') or jg_code > 9036100 ) </if>
+			<if test="carGubun eq '9'.toString()"> AND car_kind in ('승합','화물') </if>
+			<if test="carGubun eq 'green'.toString()"> AND JG_G_7 IN (1,2,3,4) </if>
+			<!-- <if test="carGubun eq '30'.toString()"><![CDATA[ 	  AND car_kind =   '중형승용' and DIESEL <> 'LPG'	]]></if>
+			<if test="carGubun eq '3L'.toString()"> AND car_kind in ('중형승용','소형승용') AND DIESEL = 'LPG'	</if>
+			<if test="carGubun eq '40'.toString()"><![CDATA[ 	  AND car_kind =   '대형승용' AND DIESEL <> 'LPG'  ]]></if>
+			<if test="carGubun eq '4L'.toString()"> AND car_kind =   '대형승용' AND DIESEL = 'LPG' </if> -->
+			<!-- <if test="carName != null"> AND CAR_NM LIKE '%' || #{carName} || '%' </if> -->
+			<if test='carName != null and carName != "" '> AND AB_NM = #{carName} </if>
+			<!-- <if test="fuelKd != null and fuelKd != ''"> AND fuel_kd LIKE '%' ||  #{fuelKd} || '%' </if> -->
+			<if test="fuelKd != null and fuelKd != ''  and fuelKd neq '5'.toString() "> AND fuel_kd = #{fuelKd} </if>
+			<if test="fuelKd eq '5'.toString() "> AND fuel_kd in ('5', '6') </if>
+			<if test="srchPrice eq '36-20'"><![CDATA[		AND LB36_AMT >= 200000 AND LB36_AMT < 300000 		]]></if>
+			<if test="srchPrice eq '36-30'"><![CDATA[		AND LB36_AMT >= 300000 AND LB36_AMT < 400000 		]]></if>
+			<if test="srchPrice eq '36-40'"><![CDATA[		AND LB36_AMT >= 400000 AND LB36_AMT < 500000 		]]></if>
+			<if test="srchPrice eq '36-50'"><![CDATA[		AND LB36_AMT >= 500000 AND LB36_AMT < 600000 		]]></if>
+			<if test="srchPrice eq '36-60'"><![CDATA[		AND LB36_AMT >= 600000 AND LB36_AMT < 700000 		]]></if>
+			<if test="srchPrice eq '36-70'"><![CDATA[		AND LB36_AMT >= 700000 AND LB36_AMT < 1000000 		]]></if>
+			<if test="srchPrice eq '36-100'"><![CDATA[	AND LB36_AMT >= 1000000 		]]></if>
+			<if test="srchPrice eq '48-20'"><![CDATA[		AND LB48_AMT >= 200000 AND LB48_AMT < 300000 		]]></if>
+			<if test="srchPrice eq '48-30'"><![CDATA[		AND LB48_AMT >= 300000 AND LB48_AMT < 400000 		]]></if>
+			<if test="srchPrice eq '48-40'"><![CDATA[		AND LB48_AMT >= 400000 AND LB48_AMT < 500000 		]]></if>
+			<if test="srchPrice eq '48-50'"><![CDATA[		AND LB48_AMT >= 500000 AND LB48_AMT < 600000 		]]></if>
+			<if test="srchPrice eq '48-60'"><![CDATA[		AND LB48_AMT >= 600000 AND LB48_AMT < 700000 		]]></if>
+			<if test="srchPrice eq '48-70'"><![CDATA[		AND LB48_AMT >= 700000 AND LB48_AMT < 1000000 		]]></if>
+			<if test="srchPrice eq '48-100'"><![CDATA[	AND LB48_AMT >= 1000000 		]]></if>
+			<if test="srchPrice eq '60-20'"><![CDATA[		AND LB60_AMT >= 200000 AND LB60_AMT < 300000 		]]></if>
+			<if test="srchPrice eq '60-30'"><![CDATA[		AND LB60_AMT >= 300000 AND LB60_AMT < 400000 		]]></if>
+			<if test="srchPrice eq '60-40'"><![CDATA[		AND LB60_AMT >= 400000 AND LB60_AMT < 500000 		]]></if>
+			<if test="srchPrice eq '60-50'"><![CDATA[		AND LB60_AMT >= 500000 AND LB60_AMT < 600000 		]]></if>
+			<if test="srchPrice eq '60-60'"><![CDATA[		AND LB60_AMT >= 600000 AND LB60_AMT < 700000 		]]></if>
+			<if test="srchPrice eq '60-70'"><![CDATA[		AND LB60_AMT >= 700000 AND LB60_AMT < 1000000 		]]></if>
+			<if test="srchPrice eq '60-100'"><![CDATA[	AND LB60_AMT >= 1000000 		]]></if>
+			ORDER BY 
+			<choose>
+				<when test="carGubun eq '9'.toString()">
+					DECODE(jg_g_35, '0', 0, '1', 1, '2', 1, '12', 1, 0) DESC,
+					<!-- DECODE(car_nm, '봉고 III EV', 1, '포터II 일렉트릭', 2, '포터II', 3, '포터II 특장', 4, '마이티', 5, '메가트럭', 6, '봉고 III', 7, '봉고 Ⅲ 특장', 8, '스타렉스밴', 9, 10), -->
+					DECODE(jg_code, '9014311', 1, '9014312', 2, '7014311', 3, '8014311', 4, '6014711', 5, '7014313', 6, 9),
+					substr(DECODE(jg_code, '9237', '9133', '6220', '6219', '4134', '4127', '5454', '5453', '9120', '9119', '6230', '6219', jg_code), 1, 3),
+					<!-- substr(DECODE(jg_code, '9025435', '9015435', '6022317', '6022316', '4012516', '4012512', '5044113', '5044114', '9014222', '9014221', '6022318', '6022316', jg_code), 1, 3), -->
+					DECODE(jg_code, '9025435', '9015435', '6022317', '6022316', '4012516', '4012512', '5044113', '5044114', '9014222', '9014221', '6022318', '6022316', jg_code),
+					CAR_NM, jg_code, decode(diesel, '휘발유', 1, '경유', 2, 3), o_1, car_name
+				</when>
+				<otherwise>
+					DECODE(jg_g_35, '0', 0, '1', 1, '2', 1, '12', 1, 0) DESC,
+					<!-- DECODE(car_nm, '봉고 III EV', 1, '포터II 일렉트릭', 2, 9), -->
+					DECODE(jg_code, '9014311', 1, '9014312', 2, '7014311', 3, '8014311', 4, '6014711', 5, '7014313', 6, 9),
+					substr(DECODE(jg_code, '9237', '9133', '6220', '6219', '4134', '4127', '5454', '5453', '9120', '9119', '6230', '6219', jg_code), 1, 3),
+					<!-- substr(DECODE(jg_code, '9025435', '9015435', '6022317', '6022316', '4012516', '4012512', '5044113', '5044114', '9014222', '9014221', '6022318', '6022316', jg_code), 1, 3), -->
+					DECODE(jg_code, '9025435', '9015435', '6022317', '6022316', '4012516', '4012512', '5044113', '5044114', '9014222', '9014221', '6022318', '6022316', jg_code),
+					CAR_NM, jg_code,decode(diesel, '휘발유', 1, '경유', 2, 3), o_1, car_name
+				</otherwise>
+			</choose>
+	</select>
+	
+	<select id="selectDomesticRentDetail_price" parameterType="String" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				C.JG_B, C.JG_G_17, A.*
+			FROM 
+				amazoncar.MAIN_CAR A, amazoncar.ESTI_JG_VAR C, 
+				(
+				SELECT 
+					SH_CODE, MAX(REG_DT) AS JG_REG_DT
+         		FROM 
+         			amazoncar.ESTI_JG_VAR
+         		GROUP BY SH_CODE
+         		) B
+			WHERE 
+				A.SEQ=#{seq}
+				AND A.jg_code=C.SH_CODE
+				AND C.SH_CODE = B.SH_CODE 
+				AND C.reg_dt=B.JG_REG_DT
+		]]>
+	</select>
+	
+	<select id="selectDomesticRentDetail_main" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				a.*, b.NM AS COMP_FULL_NM
+			FROM 
+				amazoncar.MAIN_CAR a, amazoncar.CODE b
+			WHERE 
+				a.SEQ=#{seq}
+			  	AND a.AGREE_DIST = #{agreeDist}
+			  	AND a.CAR_COMP_ID = b.CODE
+			  	AND b.C_ST = '0001'
+		]]>
+	</select>
+	
+	<select id="selectDomesticRentDetail_estimate" parameterType="String" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				*
+			FROM 
+				amazoncar.ESTIMATE_HP
+			WHERE 
+				est_id=#{estimateId}
+		]]>
+	</select>
+	
+	<select id="selectCommonCarDetail" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				a.car_comp_id as CAR_COMP_ID, b.nm as CAR_COMP_NM, a.code as CODE, a.car_cd as CAR_CD,
+				a.car_nm as CAR_NM, c.car_id as CAR_ID,c.car_name as CAR_NAME, c.use_yn as CAR_YN, c.SECTION, c.car_y_form,
+				c.CAR_SEQ, c.CAR_B, c.CAR_B_P, c.CAR_B_DT, c.dpm, c.max_le_36, c.max_le_24, c.max_le_12, c.max_re_36, c.max_re_24, c.max_re_18,
+				c.s_st, c.est_yn, c.car_b_inc_id, c.car_b_inc_seq, sh_code, diesel_yn, auto_yn, c.jg_code, c.CAR_CD as CAR_CODE, c.etc, c.etc2, b.bigo,
+				c.duty_free_opt, a.use_yn AS USE_YN, a.est_yn as ESTIMATE_YN, a.main_yn as MAIN_YN, c.hp_yn as HP_YN, c.car_y_form_yn
+			FROM 
+				amazoncar.car_mng a, amazoncar.code b, amazoncar.car_nm c
+			WHERE 
+				a.car_comp_id=c.car_comp_id 
+				AND a.code=c.car_cd
+				AND a.car_comp_id=b.code 
+				AND b.c_st = '0001'
+      			AND C.CAR_ID = #{carId}
+      			AND C.CAR_SEQ = #{carSeq}
+      	]]>
+	</select>
+	
+	<!-- a.JG_TUIX_ST 및 정렬조건 추가 2017.07.07 -->
+	<select id="selectCarOption" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				a.car_s_seq as id, a.car_u_seq as seq, a.car_s as nm, a.car_s_p as amt, '' s_st, '' car_b, a.opt_b, a.JG_OPT_ST, a.JG_TUIX_ST, a.LKAS_YN, a.LDWS_YN, a.AEB_YN, a.FCW_YN, a.HOOK_YN, a.CAR_RANK, a.JG_OPT_YN, b.duty_free_opt, a.garnish_yn
+			FROM 
+				amazoncar.car_opt a, (select car_comp_id, car_cd, car_id, hp_yn, car_seq, duty_free_opt from amazoncar.car_nm WHERE hp_yn='Y' AND use_yn='Y') b
+			WHERE 
+				a.car_comp_id=b.car_comp_id
+				AND a.car_cd=b.car_cd 
+				AND a.car_id=b.car_id
+				AND a.car_u_seq=b.car_seq			
+				AND a.car_comp_id=#{carCompId}
+				AND a.car_cd= #{carCode}
+				AND a.car_id= #{carId}
+				AND a.car_s_dt>='20040101'
+				AND a.USE_YN = 'Y'
+			ORDER BY 
+				TO_NUMBER(a.CAR_RANK) asc
+		]]>
+		<!-- ORDER BY DECODE(b.duty_free_opt, '1',1, '0',2, 4), AMT ASC, DECODE(JG_TUIX_ST,'Y',1,2) DESC -->
+		<!-- (select car_comp_id, car_cd, car_id, max(car_u_seq) car_u_seq from car_opt group by car_comp_id, car_cd, car_id) b -->
+		<!-- AND a.car_u_seq=b.car_u_seq -->
+		<!-- AND USE_YN = 'Y' -->
+	</select>
+
+	<select id="selectJGCarOption" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT *
+		FROM (
+		SELECT JG_OPT_8, JG_OPT_9
+		FROM amazoncar.esti_jg_opt_var
+		WHERE 
+			SH_CODE IN (
+				SELECT 
+					DISTINCT c.JG_CODE
+				FROM 
+					amazoncar.car_mng a, amazoncar.code b, amazoncar.car_nm c
+				WHERE 
+					a.car_comp_id=c.car_comp_id 
+					AND a.code=c.car_cd
+					AND a.car_comp_id=b.code 
+					AND a.car_comp_id = #{carCompId}
+					AND c.car_id = #{carId}
+					AND c.CAR_CD = #{carCode}
+			)
+			AND JG_OPT_ST = #{JG_OPT_ST}
+		ORDER BY SEQ DESC
+		)
+		WHERE 
+			ROWNUM = 1
+	</select>
+
+	<select id="selectCarColor" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				DISTINCT a.car_c_seq as id, a.car_u_seq as seq, a.car_c as nm, a.car_c_p as amt, '' s_st, '' car_b, a.col_st, a.jg_opt_st
+			FROM 
+				amazoncar.car_col a, amazoncar.CAR_COL_TRIM c
+			WHERE 
+				a.car_comp_id=c.car_comp_id
+				AND a.car_cd=c.car_cd
+				AND a.car_u_seq=c.car_u_seq
+				AND a.car_c_seq=c.car_c_seq
+				AND a.car_comp_id=#{carCompId}
+				AND a.car_cd=#{carCode}
+				AND a.car_c_dt>='20040101'
+				AND c.car_id=#{carId}
+				AND a.COL_ST = 1
+				AND USE_YN = 'Y'
+		]]>
+			ORDER BY a.car_c_p, a.car_c ASC <!-- 수정2: FMS신차견적내기에서 처럼 정렬 (2017.11.27)-->
+			<!-- ORDER BY a.car_c_seq ASC --> <!-- 수정: 색상파일 업로드 순서대로 정렬 (2017.11.27)-->
+			<!-- ORDER BY a.car_c ASC --><!-- 기존: 색상명 순서대로 정렬되고 있었음. -->
+			
+			<!-- 			
+			SELECT DISTINCT a.car_c_seq as id, a.car_u_seq as seq, a.car_c as nm, a.car_c_p as amt, '' s_st, '' car_b, a.col_st, a.jg_opt_st
+			FROM car_col a, (select car_comp_id, car_cd, max(car_u_seq) car_u_seq from car_col group by car_comp_id, car_cd) b, CAR_COL_TRIM C
+			WHERE a.car_comp_id=b.car_comp_id
+			AND a.car_cd=b.car_cd
+			AND a.car_u_seq=b.car_u_seq
+			and a.car_u_seq=c.car_u_seq
+			and a.car_c_seq=c.car_c_seq
+			AND a.car_comp_id=#{carCompId}
+			AND a.car_cd=#{carCode}
+			AND a.car_c_dt>='20040101'
+			AND c.car_id=#{carId}
+			AND a.COL_ST = 1
+			AND USE_YN = 'Y'			
+			 -->
+	</select>
+
+	<select id="selectStandardDateForEstimate" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				'emStdDate' AS gubun ,max(a_j) AS std_dt 
+			FROM 
+				amazoncar.esti_comm_var 
+			WHERE 
+				a_a='1' 
+				AND a_j<=to_char(sysdate,'YYYYMMDD')
+			UNION All
+			SELECT 
+				'eaStdDate' AS gubun, max(a_j) AS std_dt 
+			FROM 
+				amazoncar.esti_car_var 
+			WHERE 
+				a_a='1' 
+				AND a_j<=to_char(sysdate,'YYYYMMDD') 
+			GROUP BY a_a having count(0) >40
+			UNION All
+			SELECT 
+				'jgStdDate' AS gubun, max(reg_dt) AS std_dt 
+			FROM 
+				amazoncar.esti_jg_var 
+			WHERE 
+				reg_dt<=to_char(sysdate,'YYYYMMDD')
+		]]>
+			<!-- SELECT 'emStdDate' AS gubun ,max(a_j) AS std_dt FROM esti_comm_var where a_j<=to_char(sysdate,'YYYYMMDD')
+			UNION All
+			SELECT 'eaStdDate' AS gubun, max(a_j) AS std_dt FROM esti_car_var where a_j<=to_char(sysdate,'YYYYMMDD')
+			UNION All
+			SELECT 'jgStdDate' AS gubun, max(reg_dt) AS std_dt FROM esti_jg_var where reg_dt<=to_char(sysdate,'YYYYMMDD') -->
+	</select>
+	
+	<select id="selectEstiCommVarForEstimateSh" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				br_cons_00, br_cons_01, br_cons_02, br_cons_03, br_cons_04,
+			    br_cons_10, br_cons_11, br_cons_12, br_cons_13, br_cons_14,
+			    br_cons_20, br_cons_21, br_cons_22, br_cons_23, br_cons_24,
+			    br_cons_30, br_cons_31, br_cons_32, br_cons_33, br_cons_34,
+			    br_cons_40, br_cons_41, br_cons_42, br_cons_43, br_cons_44
+			FROM  
+				amazoncar.esti_comm_var 
+			WHERE 
+				a_a='1' 
+				AND seq IN (SELECT MAX(seq) seq FROM amazoncar.esti_comm_var WHERE a_a='1')
+		]]>
+	</select>
+	
+	<select id="selectEstimateData" parameterType="String" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				* 
+			FROM   
+				amazoncar.ESTIMATE_CU
+			WHERE  
+				REG_CODE = #{regCode}
+				AND JOB = 'org'
+		]]>
+	</select>
+	
+	<select id="selectSecondhandEstimateData" parameterType="String" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				* 
+			FROM   
+				amazoncar.ESTIMATE_CU
+			WHERE  
+				REG_CODE = #{regCode}
+		]]>
+	</select>
+	
+	<select id="selectSecondhandData" parameterType="String" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				* 
+			FROM   
+				amazoncar.SECONDHAND
+			WHERE  
+				REG_CODE = #{regCode}
+				AND ROWNUM = 1
+		]]>
+	</select>
+
+	<select id="selectImportsRentListForSearch" resultType="hashmap" parameterType="hashmap">
+		SELECT 
+			DISTINCT CAR_COMP_ID, COM_NM, CAR_NM
+		FROM (
+			SELECT 
+				com_nm, car_comp_id, jg_code, diesel,
+				DECODE(SUBSTR(jg_code,1,3), '380', car_comp_id||car_cd, '480',car_comp_id||car_cd, '580',car_comp_id||car_cd, SUBSTR(jg_code,1,4)) AS car_cd, 
+				MIN(car_nm) AS CAR_NM, o_1
+		    FROM   
+		    	amazoncar.MAIN_CAR a
+			WHERE  
+				o_1>0
+				AND AGREE_DIST = #{agreeDist}
+				AND CAR_COMP_ID NOT IN '0055'
+				<choose>
+					<when test="carCompId != null and carCompId != ''">
+						AND car_comp_id = #{carCompId}
+					</when>
+					<otherwise>
+						AND car_comp_id not in ('0001','0002','0003','0004','0005')
+					</otherwise>
+				</choose>
+				<if test="mode eq 'rent'"> AND rb36_amt > -1 AND (rb36_amt+rs36_amt) > 0 </if>
+				<if test="mode eq 'lease'"> AND LB36_AMT + LB36_AMT2 > -1 </if>
+			GROUP BY com_nm, car_comp_id, jg_code, diesel, o_1, DECODE(SUBSTR(jg_code,1,3), '380',car_comp_id||car_cd, '480',car_comp_id||car_cd, '580',car_comp_id||car_cd, SUBSTR(jg_code,1,4))
+			order by decode(car_comp_id,'0056',0,'0013',1,'0027',2,'0018',3,'0011',4,'0044',5,'0033',6,'0025',7,'0007',8,'0049',9,'0048',10,'0047',11,'0021',12,'0034',13,'0006',14,'0051',15,'0050',16), 
+			substr(jg_code,1,2), car_nm, o_1
+		)
+		ORDER BY decode(car_comp_id,'0056',0,'0013',1,'0027',2,'0018',3,'0011',4,'0044',5,'0033',6,'0025',7,'0007',8,'0049',9,'0048',10,'0047',11,'0021',12,'0034',13,'0006',14,'0051',15,'0050',16), car_nm
+	</select>
+
+	<select id="selectImportsRentList" resultType="hashmap" parameterType="hashmap">
+		SELECT 
+			b.NM, a.SEQ, a.CAR_COMP_ID, a.JG_CODE, a.CAR_NM, a.CAR_NAME, a.AUTO, a.DIESEL, a.O_1, a.CAR_KIND, a.COM_NM, a.CAR_CNT, a.REG_DT, a.A_B, a.DPM, a.CAR_CD, a.O_1_2, a.AGREE_DIST, a.JG_G_7,
+			a.RB36_ID, a.RB36_AMT, a.RS36_ID, a.RS36_AMT, a.LB36_ID, a.LB36_AMT, a.LS36_ID, a.LS36_AMT, a.LB36_ID2, a.LB36_AMT2, a.LS36_ID2, a.LS36_AMT2,
+			a.RB24_ID, a.RB24_AMT, a.RS24_ID, a.RS24_AMT, a.LB24_ID, a.LB24_AMT, a.LS24_ID, a.LS24_AMT, a.LB24_ID2, a.LB24_AMT2, a.LS24_ID2, a.LS24_AMT2,
+			a.RB12_ID, a.RB12_AMT, a.RS12_ID, a.RS12_AMT, a.LB12_ID, a.LB12_AMT, a.LS12_ID, a.LS12_AMT, a.LB12_ID2, a.LB12_AMT2, a.LS12_ID2, a.LS12_AMT2,
+			a.RB48_ID, a.RB48_AMT, a.RS48_ID, a.RS48_AMT, a.LB48_ID, a.LB48_AMT, a.LS48_ID, a.LS48_AMT, a.LB48_ID2, a.LB48_AMT2, a.LS48_ID2, a.LS48_AMT2,
+			a.RB60_ID, a.RB60_AMT, a.RS60_ID, a.RS60_AMT, a.LB60_ID, a.LB60_AMT, a.LS60_ID, a.LS60_AMT, a.LB60_ID2, a.LB60_AMT2, a.LS60_ID2, a.LS60_AMT2,
+			a.DUTY_FREE_OPT, a.JG_G_34, a.JG_G_35 
+		FROM   
+			amazoncar.MAIN_CAR a, amazoncar.CODE B 
+		WHERE  
+			a.CAR_COMP_ID = b.CODE 
+			AND  a.o_1 > 0 
+			AND b.c_st = '0001' 
+			AND AGREE_DIST = #{agreeDist} 
+			and a.car_comp_id not in ('0001','0002','0003','0004','0005')
+			<if test="carName != null and carName != ''"> AND a.car_nm = #{carName} </if>
+			<if test="carCompId != null and carCompId != ''"> AND a.car_comp_id = #{carCompId} </if>
+			<if test="mode eq 'rent'"> AND a.rb36_amt > -1 AND (a.rb36_amt+a.rs36_amt) > 0 </if>
+			<if test="mode eq 'lease'"> AND (a.LB36_AMT + a.LB36_AMT2) > -1 </if>
+		order by  decode(a.car_comp_id,'0056',0,'0013',1,'0027',2,'0018',3,'0011',4,'0044',5,'0033',6,'0025',7,'0007',8,'0049',9,'0048',10,'0047',11,'0021',12,'0034',13,'0006',14,'0051',15,'0050',16), SUBSTR(a.jg_code,1,2), a.CAR_NM, a.JG_CODE, decode(diesel,'휘발유',1,'경유',2,3), o_1
+	</select>
+	
+	<select id="selectSecondhandRentList" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			v.*, 
+			TO_CHAR(SYSDATE+3,'YYYYMMDD') as s_dt, 
+			decode(v.park, '1', 'S1', '2', 'S1', '3', 'B1', '4', 'D1', '5', 'S1', '7', 'B1', '8', 'B1', '9', 'D1', '12', 'J1', '13', 'G1', nvl(v.mng_br_id, v.brch_id)) as BR_FROM 
+		FROM 
+			amazoncar.v_rerent  v 
+		WHERE 1=1
+			AND NVL(v.res_cnt, 0)<>'2'
+			AND (
+				v.rent_st != '지연대차' 
+     			OR (v.rent_st = '지연대차' AND v.ret_plan_dt < TO_CHAR(SYSDATE+3, 'YYYYMMDDHHmm'))
+			)
+		]]>   
+		 <!-- AND (rent_st NOT IN '지연대차' OR (rent_st ='지연대차' AND ret_plan_dt < TO_CHAR(SYSDATE+3,'YYYYMMDD') AND NVL(res_cnt,0)<>'2' )) -->
+		 <!-- <if test="region != null"><![CDATA[ 	and decode(v.park, '1', 'S1', '2', 'S1', '3', 'B1', '4', 'D1', '5', 'S1', '7', 'B1', '8', 'B1', '9', 'D1', '12', 'J1', '13', 'G1', nvl(v.mng_br_id, v.brch_id)) = #{region} 	]]></if> -->
+		 <if test="agreeDist != null"> and v.agree_dist = #{agreeDist} </if>
+		 <if test="agreeDist eq null"> and v.agree_dist = '10000' </if>
+		 <!-- <if test="carGubun eq '1'.toString()"> AND v.jg_code between '4111' AND '4999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '2'.toString()"> AND v.jg_code between '3111' AND '3999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '3'.toString()"> AND v.jg_code between '1111' AND '2999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '4'.toString()"> AND v.jg_code between '4111' AND '4999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용')	</if>
+		 <if test="carGubun eq '5'.toString()"> AND v.jg_code between '3111' AND '3999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용')	</if>
+		 <if test="carGubun eq '6'.toString()"> AND v.jg_code between '5111' AND '7999' and v.car_comp_id in ('0001','0002','0003','0004','0005') </if>
+		 <if test="carGubun eq '7'.toString()"> AND v.car_comp_id not in ('0001','0002','0003','0004','0005') </if>
+		 <if test="carGubun eq '8'.toString()"> AND v.jg_code between '1111' AND '2999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '9'.toString()"> AND v.jg_code between '8111' AND '9999' and v.car_comp_id in ('0001','0002','0003','0004','0005') </if> -->
+		 <if test="carGubun eq '1'.toString()"> AND v.jg_code like '4%' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '2'.toString()"> AND v.jg_code like '3%' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '3'.toString()"> AND v.jg_code between '1000000' AND '2999999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd not in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '4'.toString()"> AND v.jg_code like '4%' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용')	</if>
+		 <if test="carGubun eq '5'.toString()"> AND v.jg_code like '3%' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용')	</if>
+		 <if test="carGubun eq '6'.toString()"> AND ( v.jg_code between '5000000' AND '7999999' OR v.jg_code > 9036100 ) and v.car_comp_id in ('0001','0002','0003','0004','0005') </if>
+		 <if test="carGubun eq '7'.toString()"> AND v.car_comp_id not in ('0001','0002','0003','0004','0005') </if>
+		 <if test="carGubun eq '8'.toString()"> AND v.jg_code between '1000000' AND '2999999' and v.car_comp_id in ('0001','0002','0003','0004','0005') and v.fuel_kd in ('LPG','휘발유+LPG겸용','휘발유(무연)+LPG겸용') </if>
+		 <if test="carGubun eq '9'.toString()"> AND v.jg_code between '8000000' AND '9999999' and v.car_comp_id in ('0001','0002','0003','0004','0005') </if>
+		 <if test="carGubun eq 'green'.toString()"> AND v.jg_g_7 IN (1,2,3,4) </if>
+		 <if test="resFlag eq 'Y'.toString()"><![CDATA[ and nvl(v.situation,'-')<>'상담중' ]]></if>
+		 <if test="srchPrice eq '12-25'"><![CDATA[	AND ( v.RB12 <= 250000 AND v.LB12 = 0 OR v.LB12 <= 250000 AND v.RB12 = 0 ) ]]></if>
+		 <if test="srchPrice eq '24-25'"><![CDATA[	AND ( v.RB24 <= 250000 AND v.LB24 = 0 OR v.LB24 <= 250000 AND v.RB24 = 0 ) ]]></if>
+		 <if test="srchPrice eq '36-25'"><![CDATA[	AND ( v.RB36 <= 250000 AND v.LB36 = 0 OR v.LB36 <= 250000 AND v.RB36 = 0 ) ]]></if>
+		 <if test="srchPrice eq 'max-25'"><![CDATA[ AND ( v.MAX_AMT <= 250000 ) ]]></if>
+		 <if test="srchPrice eq '12-30'"><![CDATA[	AND ( v.RB12 <= 300000 AND v.LB12 = 0 AND v.RB12 > 250000	OR v.LB12 <= 300000 AND v.RB12 = 0 AND v.LB12 > 250000	) ]]></if>
+		 <if test="srchPrice eq '24-30'"><![CDATA[	AND ( v.RB24 <= 300000 AND v.LB24 = 0 AND v.RB24 > 250000	OR v.LB24 <= 300000 AND v.RB24 = 0 AND v.LB24 > 250000	) ]]></if>
+		 <if test="srchPrice eq '36-30'"><![CDATA[	AND ( v.RB36 <= 300000 AND v.LB36 = 0 AND v.RB36 > 250000	OR v.LB36 <= 300000 AND v.RB36 = 0 AND v.LB36 > 250000	) ]]></if>
+		 <if test="srchPrice eq 'max-30'"><![CDATA[	AND ( v.MAX_AMT <= 300000 AND v.MAX_AMT > 250000 )		]]></if>
+		 <if test="srchPrice eq '12-35'"><![CDATA[	AND ( v.RB12 <= 350000 AND v.LB12 = 0 AND v.RB12 > 300000	OR v.LB12 <= 350000 AND v.RB12 = 0 AND v.LB12 > 300000	) ]]></if>
+		 <if test="srchPrice eq '24-35'"><![CDATA[	AND ( v.RB24 <= 350000 AND v.LB12 = 0 AND v.RB24 > 300000	OR v.LB24 <= 350000 AND v.RB24 = 0 AND v.LB24 > 300000	) ]]></if>
+		 <if test="srchPrice eq '36-35'"><![CDATA[	AND ( v.RB12 <= 350000 AND v.LB12 = 0 AND v.RB24 > 300000	OR v.LB36 <= 350000 AND v.RB36 = 0 AND v.LB36 > 300000	) ]]></if>
+		 <if test="srchPrice eq 'max-35'"><![CDATA[	AND ( v.MAX_AMT <= 350000 AND v.MAX_AMT > 300000 )		]]></if>
+		 <if test="srchPrice eq '12-40'"><![CDATA[	AND ( v.RB12 <= 400000 AND v.LB12 = 0 AND v.RB12 > 350000	OR v.LB12 <= 400000 AND v.RB12 = 0 AND v.LB12 > 350000	) ]]></if>
+		 <if test="srchPrice eq '24-40'"><![CDATA[	AND ( v.RB24 <= 400000 AND v.LB12 = 0 AND v.RB24 > 350000	OR v.LB24 <= 400000 AND v.RB24 = 0 AND v.LB24 > 350000	) ]]></if>
+		 <if test="srchPrice eq '36-40'"><![CDATA[	AND ( v.RB12 <= 400000 AND v.LB12 = 0 AND v.RB24 > 350000	OR v.LB36 <= 400000 AND v.RB36 = 0 AND v.LB36 > 350000	) ]]></if>
+		 <if test="srchPrice eq 'max-40'"><![CDATA[	AND ( v.MAX_AMT <= 400000 AND v.MAX_AMT > 350000 )		]]></if>
+		 <if test="srchPrice eq '12-49'"><![CDATA[	AND ( v.RB12 < 500000 AND v.LB12 = 0 AND v.RB12 > 400000	OR v.LB12 < 500000 AND v.RB12 = 0 AND v.LB12 > 400000 	)		]]></if>
+		 <if test="srchPrice eq '24-49'"><![CDATA[	AND ( v.RB24 < 500000 AND v.LB12 = 0 AND v.RB24 > 400000	OR v.LB24 < 500000 AND v.RB24 = 0 AND v.LB24 > 400000	) 		]]></if>
+		 <if test="srchPrice eq '36-49'"><![CDATA[	AND ( v.RB12 < 500000 AND v.LB12 = 0 AND v.RB24 > 400000	OR v.LB36 < 500000 AND v.RB36 = 0 AND v.LB36 > 400000 	)		]]></if>
+		 <if test="srchPrice eq 'max-49'"><![CDATA[	AND ( v.MAX_AMT <= 500000 AND v.MAX_AMT > 400000 )		]]></if>
+		 <if test="srchPrice eq '12-50'"><![CDATA[	AND ( v.RB12 >= 500000 AND v.LB12 = 0 OR v.LB12 >= 500000 AND v.RB12 = 0 )		]]></if>
+		 <if test="srchPrice eq '24-50'"><![CDATA[	AND ( v.RB24 >= 500000 AND v.LB12 = 0 OR v.LB24 >= 500000 AND v.RB24 = 0 )		]]></if>
+		 <if test="srchPrice eq '36-50'"><![CDATA[	AND ( v.RB12 >= 500000 AND v.LB12 = 0 OR v.LB36 >= 500000 AND v.RB36 = 0 )  	]]></if>
+		 <if test="srchPrice eq 'max-50'"><![CDATA[	AND ( v.MAX_AMT >= 500000 )		]]></if>
+		 <if test="region != null and region != 'All'">
+	   	<![CDATA[ 	
+	   		and decode(v.park, '1', 'S1', '2', 'S1', '3', 'B1', '4', 'D1', '5', 'S1', '7', 'B1', '8', 'B1', '9', 'D1', '12', 'J1', '13', 'G1', nvl(v.mng_br_id, v.brch_id)) = #{region} 	
+	   	]]>
+	   	</if>
+		 ORDER BY 
+		 	decode(v.car_mng_id, '042887', 0, '041043', 1, '040559', 2, 9), 
+		 	decode(v.car_comp_id, '0001', 0, '0002', 0, '0003', 0, '0004', 0, '0005', 0, 1), 
+		 	decode(v.fuel_kd, '3', 0, '5', 0, '6', 0, 1),
+		 	v.jg_code, v.car_jnm, v.car_nm, v.init_reg_dt <!-- , v.car_mng_id -->
+		 
+	</select>
+	
+	<select id="selectSecondhandRentList-old" resultType="hashmap">
+		SELECT
+			s.reg_code, s.max_use_mon, s.lsmax, s.lbmax, s.rsmax, s.rbmax,  DECODE(rbmax, 0, lbmax, rbmax) as max_amt,  g.car_comp_id, s.rb12, s.rs12, s.lb12, s.ls12, s.rb24, s.rs24, s.lb24, s.ls24, s.rb36, s.rs36, s.lb36, s.ls36, s.rb48, s.rs48, s.lb48, s.ls48,
+		    b.rent_mng_id, b.rent_l_cd, a.car_mng_id, a.car_no, '*** '||SUBSTR(a.car_no,-4) ab_car_no, a.car_y_form,
+		    c.imgfile1, NVL(h2.save_file, c.imgfile6) imgfile6, h2.save_folder, h.car_nm car_jnm, g.car_name car_nm, a.dpm, b.colo,
+			substr(a.init_reg_dt,1,4)||'년'||substr(a.init_reg_dt,5,2)||'월' init_reg_dt, s.real_km,
+		    decode(a.fuel_kd,'1','휘발유','2','휘발유(무연)','3','LPG','4','경유','5','휘발유+LPG겸용','6','휘발유(무연)+LPG겸용','7','휘발유+전기') fuel_kd,
+		    decode(s.rb36, 0,s.lb36, -1,s.lb36, s.rb36) fee_amt,
+		    decode(s.rb30, 0,s.lb30, -1,s.lb30, s.rb30) fee_amt_30,
+			NVL(s.rb36, s.rs36) rb, NVL(s.lb36, s.ls36) lb, NVL(s.rb30, s.rs30) rb30, NVL(s.lb30, s.ls30) lb30,
+		    j.sh_code, sr.RES_END_DT,g2.res_cnt,
+		    /*네  고*/decode(sr.situation,'0','상담중','1','계약진행중','2','계약확정','예약가능') situation, 
+		    decode(nvl(hh.rent_st,ii.rent_st),'1','단기대여','2','정비대차','3','사고대차','9','보험대차','10','지연대차','4','업무대여','5','업무대여','6','차량정비','7','차량정비','8','사고수리','11','예약대기','12','월렌트','대기') rent_st,
+		    nvl( hh.ret_plan_dt, ii.ret_plan_dt ) AS ret_plan_dt
+		 FROM   
+		 	amazoncar.car_reg a, amazoncar.cont e, amazoncar.car_etc b, amazoncar.apprsl c, amazoncar.car_nm g, amazoncar.car_mng h, 
+		    (select a.* from amazoncar.esti_jg_var a where a.seq = (select max(seq) from amazoncar.esti_jg_var where sh_code=a.sh_code)) j, 
+		    (select a.* from amazoncar.secondhand a  where a.seq = (select max(seq) from amazoncar.secondhand  where reg_code is not null and car_mng_id=a.car_mng_id)) s, 
+		    (select a.* from amazoncar.sh_res a      where a.use_yn='Y' and a.situation in ('0','2')) sr, 
+		    <![CDATA[ (select * from amazoncar.rent_cont a  where a.use_st = '2' and a.rent_st<>'11') hh, ]]>
+			<![CDATA[ (select * from amazoncar.rent_cont a  where a.use_st = '1' and a.rent_st<>'11') ii, ]]>
+			( SELECT a.car_mng_id, count( * ) res_cnt FROM amazoncar.sh_res a WHERE a.use_yn IS NULL AND a.situation IN ( '0', '2' ) GROUP BY a.car_mng_id ) g2,
+			(select SUBSTR(content_seq,1,6) car_mng_id, content_seq, save_folder, save_file  from amazoncar.ACAR_ATTACH_FILE where content_code='APPRSL' AND SUBSTR(content_seq,7,1) = '1') h2
+		 WHERE  
+		 	a.car_mng_id=e.car_mng_id and a.car_mng_id = hh.car_mng_id(+) and a.car_mng_id = ii.car_mng_id(+) AND a.car_mng_id = g2.car_mng_id(+)
+		    and e.use_yn='Y' and e.car_st='2'
+		    and nvl(a.off_ls,'0') in ('0')		
+		    and a.secondhand = '1'
+		    and nvl(a.prepare,'0') not in ('7', '9')
+		    and e.rent_mng_id=b.rent_mng_id and e.rent_l_cd=b.rent_l_cd
+		    and a.car_mng_id=c.car_mng_id(+)
+		    and b.car_id=g.car_id and b.car_seq=g.car_seq
+		    and g.car_comp_id=h.car_comp_id and g.car_cd=h.code
+		    and g.jg_code=j.sh_code
+		    and a.car_mng_id = s.car_mng_id
+		    and a.car_mng_id = sr.car_mng_id(+) and a.car_mng_id=h2.car_mng_id(+) 
+		    <![CDATA[	and nvl(sr.situation,'0')<>'2'	]]> 
+			<!-- <if test="carGubun eq '1'.toString()"> and g.jg_code between '4111' and '4999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '2'.toString()"> and g.jg_code between '3111' and '3999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '3'.toString()"> and g.jg_code between '1111' and '2999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '4'.toString()"> and g.jg_code between '4111' and '4999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd in ('3','5','6')	</if>
+			<if test="carGubun eq '5'.toString()"> and g.jg_code between '3111' and '3999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd in ('3','5','6')	</if>
+			<if test="carGubun eq '6'.toString()"> and g.jg_code between '5111' and '9999' and g.car_comp_id in ('0001','0002','0003','0004','0005') </if>
+			<if test="carGubun eq '7'.toString()"> AND g.car_comp_id not in ('0001','0002','0003','0004','0005') </if>
+			<if test="carGubun eq '8'.toString()"> AND g.jg_code between '1111' and '2999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd in ('3','5','6') </if> -->
+			<if test="carGubun eq '1'.toString()"> and g.jg_code like '4%' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '2'.toString()"> and g.jg_code like '3%' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '3'.toString()"> and g.jg_code between '1000000' and '2999999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd not in ('3','5','6') </if>
+			<if test="carGubun eq '4'.toString()"> and g.jg_code like '4%' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd in ('3','5','6')	</if>
+			<if test="carGubun eq '5'.toString()"> and g.jg_code like '3%' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd in ('3','5','6')	</if>
+			<if test="carGubun eq '6'.toString()"> and g.jg_code between '5000000' and '9999999' and g.car_comp_id in ('0001','0002','0003','0004','0005') </if>
+			<if test="carGubun eq '7'.toString()"> AND g.car_comp_id not in ('0001','0002','0003','0004','0005') </if>
+			<if test="carGubun eq '8'.toString()"> AND g.jg_code between '1111' and '2999' and g.car_comp_id in ('0001','0002','0003','0004','0005') and a.fuel_kd in ('3','5','6') </if>
+			<if test="resFlag eq 'Y'.toString()"><![CDATA[   and nvl(sr.situation,'-')<>'0'	]]></if>
+		ORDER BY 
+			decode(a.car_mng_id, '041063', 0, '041043', 1, '040559', 2, 9), 
+			decode(g.car_comp_id, '0001', 0, '0002', 0, '0003', 0, '0004', 0, '0005', 0, 1),
+			g.jg_code, g.car_b_p, g.car_name, a.init_reg_dt
+			<!-- , a.car_mng_id --> 
+	</select>
+	
+	<select id="selectSecondhandCarDetail" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		  SELECT /*+use_hash(d c)*/ s.rm1, s.max_use_mon, s.lsmax, s.lbmax, s.rsmax, s.rbmax, 
+				s.lb12, s.lb18, s.lb24, s.lb30, s.lb36, s.lb42, s.lb48,
+				s.ls12, s.ls18, s.ls24, s.ls30, s.ls36, s.ls42, s.ls48,
+				s.rb1,  s.rb2,  s.rb3,  s.rb4,  s.rb5,  s.rb6,  s.rb7,  s.rb8,  s.rb9, s.rb10, s.rb11, s.rb12, s.rb18, s.rb24, s.rb30, s.rb36, s.rb42, s.rb48,
+				s.rs1,  s.rs2,  s.rs3,  s.rs4,  s.rs5,  s.rs6,  s.rs7,  s.rs8,  s.rs9, s.rs10, s.rs11, s.rs12, s.rs18, s.rs24, s.rs30, s.rs36, s.rs42, s.rs48,
+				s.lb12_id, s.lb24_id, s.lb36_id, s.lbmax_id,
+				s.ls12_id,  s.ls24_id, s.ls36_id, s.lsmax_id,        
+				s.rb6_id,  s.rb12_id, s.rb24_id, s.rb36_id, s.rbmax_id,
+				s.rs6_id,  s.rs12_id,  s.rs24_id, s.rs36_id, s.rsmax_id,
+				
+       			s.LB36_AG, s.LB24_AG, s.LB12_AG, s.LBMAX_AG, 
+       			s.LS36_AG, s.LS24_AG, s.LS12_AG, s.LSMAX_AG,
+				s.RB36_AG, s.RB24_AG, s.RB12_AG, s.RB6_AG, s.RBMAX_AG,
+       			s.RS36_AG, s.RS24_AG, s.RS12_AG, s.RS6_AG, s.RSMAX_AG,
+       			s.RM1_AG,
+				
+				s.real_km, s.SET_CODE, s.apply_sh_pr, b.car_id, b.car_seq, g.car_comp_id, g.jg_code, h.car_nm car_jnm, g.car_name car_nm, g.car_cd, '*** '||SUBSTR(a.car_no,-4) car_no, b.ex_gas, a.car_kd as car_kd_cd,
+				decode(a.car_kd,'1','대형승용','2','중형승용','3','소형승용','4','중형승합','5','소형승합','6','소형화물','7','중형화물') car_kd,
+				substr(a.init_reg_dt,3,2)||'/'||substr(a.init_reg_dt,5,2) yearmon, substr(a.init_reg_dt,1,4) year,
+				a.dpm, a.car_use, a.car_num, b.colo, substr(a.init_reg_dt,1,4)||'-'||substr(a.init_reg_dt,5,2)||'-'||substr(a.init_reg_dt,7,2) init_reg_dt, CEIL(MONTHS_BETWEEN(SYSDATE, TO_DATE(replace(a.init_reg_dt,'-',''), 'YYYYMMDD'))) use_mon, e.dlv_dt,
+				decode(a.fuel_kd,'1','휘발유','2','휘발유(무연)','3','LPG','4','경유','5','휘발유+LPG겸용','6','휘발유(무연)+LPG겸용','7','휘발유+전기') fuel_kd, a.fuel_kd as fuel_code, 
+				s.real_km, a.car_y_form, 
+				c.km as today_dist,
+				g.car_b, b.opt,  g.car_b_inc_id, g.car_b_inc_seq,  decode(b.lpg_yn,'Y','장착','N','미장착') lpg_yn, 
+				d.hp_pr, (b.car_cs_amt+b.car_cv_amt) car_amt, (b.opt_cs_amt+b.opt_cv_amt) opt_amt, (b.clr_cs_amt+b.clr_cv_amt) clr_amt,
+				(b.car_cs_amt+b.car_cv_amt+b.opt_cs_amt+b.opt_cv_amt+b.clr_cs_amt+b.clr_cv_amt) tot_amt, z.TAX_DC_AMT,
+				c.ass_chk, c.ass_st_dt, c.ass_ed_dt, c.ass_st_km, c.ass_ed_km, decode(c.lpg_yn,'1','있음','0','없음','2','탈거','없음') lpg_yn,
+				c.imgfile1, c.imgfile2, c.imgfile3, c.imgfile4, c.imgfile5, NVL(h2.save_file, c.imgfile6) imgfile6, h2.save_folder, 
+				s.UPLOAD_DT, s.reg_code, a.dist_cng, q.nm as CAR_COMP_NM, s.AGREE_DIST,DIESEL_YN,
+				/* 지역 */
+				decode(NVL(pk.park_id,a.park),'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','10','S1','12','J1','13','G1','14','J1', nvl(re.mng_br_id,e.brch_id)) br_id,       
+       			decode(decode(NVL(pk.park_id,a.park),'1','S1','2','S1','3','B1','4','D1','5','S1','7','B1','8','B1','9','D1','10','S1','12','J1','13','G1','14','J1', nvl(re.mng_br_id,e.brch_id)),'S1','수도권','D1','대전','G1','대구','J1','광주','B1','부산') br_nm
+			
+			FROM amazoncar.car_reg a, amazoncar.car_etc b, amazoncar.apprsl c, amazoncar.cont e, amazoncar.car_nm g, amazoncar.CAR_MNG h, amazoncar.sh_base z,
+			
+				(SELECT a.car_mng_id CAR_MNG_ID, a.seq SEQ, a.actn_st ACTN_ST, a.damdang_id DAMDANG_ID, a.hp_pr HP_PR, a.st_pr ST_PR FROM amazoncar.auction a WHERE a.seq = (select max(seq) from amazoncar.auction where car_mng_id = a.car_mng_id)) d, 				
+				(select a.car_mng_id CAR_MNG_ID, a.serv_dt SERV_DT, a.tot_dist TOT_DIST  from amazoncar.service a where a.serv_id = (select max(serv_id) from amazoncar.service where car_mng_id = a.car_mng_id)) i, 
+				(select SUBSTR(content_seq,1,6) car_mng_id, content_seq, save_folder, save_file from amazoncar.ACAR_ATTACH_FILE where content_code='APPRSL' AND SUBSTR(content_seq,7,1) = '1'  AND ISDELETED = 'N' ) h2 ,
+				(select * from amazoncar.secondhand a where a.seq = (select max(seq) from amazoncar.secondhand where agree_dist=#{agreeDist} and reg_code is not null and car_mng_id=a.car_mng_id)  ) s, amazoncar.code q, amazoncar.CONT_ETC re, amazoncar.PARK_CONDITION pk
+				
+			WHERE 
+				a.car_mng_id=#{carManagedId} 
+				AND   nvl(e.use_yn,'Y')='Y' 
+				AND   a.car_mng_id=e.car_mng_id 
+				AND 	 e.rent_l_cd=b.rent_l_cd
+				AND   a.car_mng_id=c.car_mng_id(+) 
+				AND   a.car_mng_id=d.car_mng_id(+) 
+				AND   a.car_mng_id=i.car_mng_id(+)
+				AND	 a.car_mng_id=z.car_mng_id(+)
+				AND   a.car_mng_id=h2.car_mng_id(+) 
+				AND   a.car_mng_id=pk.car_mng_id(+)
+				AND   b.rent_mng_id=re.rent_mng_id 
+				AND 	 b.rent_l_cd=re.rent_l_cd
+				AND   b.car_id=g.car_id 
+				AND 	 b.car_seq=g.car_seq 
+				AND 	 g.car_comp_id=h.car_comp_id 
+				AND 	 g.car_cd=h.code  
+				AND   a.car_mng_id=s.car_mng_id 
+				AND   q.c_st = '0001' 
+				AND 	 q.code = g.car_comp_id
+				AND   rownum=1
+		]]>
+	</select>
+	
+	<select id="selectDiscountRentCarList" resultType="hashmap" parameterType="hashmap">
+		SELECT 
+			a.car_mng_id, a.car_no, a.car_nm, d.car_name, c.opt, c.colo, c.in_col, c.garnish_col,
+			c.car_cs_amt+c.car_cv_amt as CAR_AMT,
+		    c.opt_cs_amt+c.opt_cv_amt as OPT_AMT,
+			c.clr_cs_amt+c.clr_cv_amt as COL_AMT,
+			(c.car_cs_amt+c.car_cv_amt+c.opt_cs_amt+c.opt_cv_amt+c.clr_cs_amt+c.clr_cv_amt) o_1,
+			a.ncar_spe_dc_amt, a.ncar_spe_dc_cau, e.tot_dist, a.init_reg_dt, d.car_comp_id, b.car_gu
+		FROM   
+			amazoncar.car_reg a, amazoncar.cont b, amazoncar.car_etc c, amazoncar.car_nm d, amazoncar.v_tot_dist e
+		WHERE  
+			a.ncar_spe_dc_amt > 0 
+			AND a.car_mng_id=b.car_mng_id 
+<!-- 			AND b.car_st='2'  -->
+			AND b.use_yn='Y'
+			AND b.rent_mng_id=c.rent_mng_id 
+			AND b.rent_l_cd=c.rent_l_cd
+			AND c.car_id=d.car_id 
+			AND c.car_seq=d.car_seq  
+			AND a.car_mng_id=e.car_mng_id(+)
+<!-- 			AND INSTR(a.first_car_no, '허')+INSTR(a.first_car_no, '하')+INSTR(a.first_car_no, '호') > 0 -->
+	</select>
+	
+	<select id="selectDiscountLeaseCarList" resultType="hashmap" parameterType="hashmap">
+		SELECT 
+			a.car_mng_id, a.car_no, a.car_nm, d.car_name, c.opt, c.colo, c.in_col, c.garnish_col,
+			c.car_cs_amt+c.car_cv_amt as CAR_AMT,
+		    c.opt_cs_amt+c.opt_cv_amt as OPT_AMT,
+			c.clr_cs_amt+c.clr_cv_amt as COL_AMT,
+			(c.car_cs_amt+c.car_cv_amt+c.opt_cs_amt+c.opt_cv_amt+c.clr_cs_amt+c.clr_cv_amt) o_1,
+			a.ncar_spe_dc_amt, a.ncar_spe_dc_cau, e.tot_dist, a.init_reg_dt, d.car_comp_id, b.car_gu
+		FROM   
+			amazoncar.car_reg a, amazoncar.cont b, amazoncar.car_etc c, amazoncar.car_nm d, amazoncar.v_tot_dist e
+		WHERE  
+			a.ncar_spe_dc_amt > 0 
+			AND a.car_mng_id=b.car_mng_id 
+<!-- 			AND b.car_st='2'  -->
+			AND b.use_yn='Y'
+			AND b.rent_mng_id=c.rent_mng_id 
+			AND b.rent_l_cd=c.rent_l_cd
+			AND c.car_id=d.car_id 
+			AND c.car_seq=d.car_seq  
+			AND a.car_mng_id=e.car_mng_id(+)
+<!-- 			AND INSTR(a.first_car_no, '허')+INSTR(a.first_car_no, '하')+INSTR(a.first_car_no, '호') = 0 -->
+	</select>
+	
+	<select id="selectShortRentFee" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			a.*, b.code, b.nm_cd, b.nm
+		FROM   
+			amazoncar.short_fee_mng a, amazoncar.code b,
+			(
+				SELECT 
+					kind, section, fee_st, max(reg_dt) reg_dt
+	   			FROM 
+	   				amazoncar.short_fee_mng
+	   			WHERE 
+	   				reg_dt <= replace(nvl(#{rentDate},to_char(sysdate,'YYYYMMDD')),'-','')
+	   			GROUP BY kind, section, fee_st 
+     		) c
+		WHERE  
+			a.kind=b.code 
+			and b.c_st='0007' 
+			and b.code<>'0000'
+			AND a.section = ( SELECT JG_R FROM amazoncar.esti_jg_var WHERE sh_code=#{jgCode} AND reg_dt = ( SELECT max(reg_dt) AS REG_DT FROM amazoncar.esti_jg_var WHERE reg_dt <= replace(#{rentDate},'-','') ) )
+			AND a.fee_st='2'
+			AND a.kind=c.kind
+			AND a.section=C.SECTION
+			AND a.fee_st=c.fee_st
+			AND a.reg_dt=c.reg_dt 
+		]]>
+	</select>
+
+	<select id="selectCarCompList" resultType="hashmap">
+		<![CDATA[
+			SELECT *
+			FROM amazoncar.CODE
+			WHERE c_st = '0001'
+			AND code<>'0000'
+			AND APP_ST IN ('1','2')
+			AND CODE NOT IN ('0012','0009','0042','0046','0014','0037','0053','0011','0018')
+			ORDER BY 
+			DECODE(CODE,'0001',1,'0002',2,'0003',3,'0004',4,'0005',5,'0013',6,'0027',7,'0044',8,'0033',9,'0025',10,'0007',11,'0049',12,'0048',13,'0047',14,'0021',15,'0034',16,'0006',17,'0052',18,'0050',19,'0051',20,'0055',21,'0056',22)
+		]]>
+	</select>
+
+	<select id="getCarCompanyList" resultType="hashmap">
+		SELECT
+			C_ST,
+			CODE,
+			NM_CD,
+			NM,
+			ETC,
+			APP_ST,
+			CMS_BK,
+			BIGO
+		FROM
+			amazoncar.CODE
+		WHERE
+			C_ST = '0001'
+			AND cms_bk = 'Y'
+		ORDER BY
+			app_st,
+			code
+	</select>
+	
+	<select id="selectCarNameList" parameterType="string" resultType="hashmap">
+		<![CDATA[
+			 SELECT 
+			 	*
+			 FROM 
+			 	amazoncar.CAR_MNG
+			 WHERE 
+			 	car_comp_id=#{carCompId}
+			 	AND use_yn='Y'
+			 	AND nvl(est_yn,'Y')='Y' 
+			 	AND nvl(main_yn,'Y')='Y'
+			 ORDER BY CAR_NM
+		]]>
+	</select>
+	
+	<!-- 차종세팅시, jg_tuix_st 여부도 추가 (2017.07.07) -->
+	<select id="selectCarDetailList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			a.car_id as id, a.car_seq as seq, a.car_name as nm, a.car_b_p as AMT, a.s_st, a.car_b, a.jg_tuix_st, a.lkas_yn, a.ldws_yn, a.aeb_yn, a.fcw_yn, a.hook_yn, a.car_b_inc_id, a.car_b_inc_seq, a.duty_free_opt, round(a.car_b_p/(1+c.jg_3)) as duty_free_amt, round(a.car_b_p/(1+c.jg_3),-4) as hyundai_duty_free_amt
+	   	FROM 
+	   		amazoncar.car_nm a,
+			(SELECT car_id FROM amazoncar.car_nm GROUP BY car_id) b, <!-- , max(car_seq) car_seq -->
+			amazoncar.esti_jg_var c, 
+			(SELECT sh_code, max(seq) seq FROM amazoncar.esti_jg_var group BY sh_code) d, 
+			amazoncar.code e
+	  	WHERE 
+	  		a.car_id=b.car_id
+	  		AND a.jg_code = c.sh_code
+			<!-- AND a.car_seq=b.car_seq -->
+			AND a.use_yn='Y'
+			AND a.est_yn='Y'
+			AND a.car_comp_id=#{carCompId}
+			AND a.car_cd=#{carCode}
+			AND a.car_b_dt>='20040101'
+			AND a.hp_yn='Y'
+			AND c.sh_code=d.sh_code AND c.seq=d.seq  
+	    	AND a.car_comp_id = e.code AND e.c_st = '0001'
+			<!-- and a.jg_code = c.sh_code
+        	AND c.sh_code=d.sh_code AND c.seq=d.seq   
+        	AND b.JG_G_7 is NULL   -->
+   		ORDER BY  
+   			a.JG_CODE, DECODE(a.duty_free_opt, '1',1, '0',2, 3), AMT ASC
+	</select>
+	
+	<select id="selectCarMainCode" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			CAR_ID, CAR_COMP_ID, CAR_CD, CAR_SEQ, 
+			JG_K, JG_H, JG_I, JG_B, JG_G_7, JG_G_8, JG_2, JG_W, JG_3, 
+			b.reg_dt, b.SH_CODE, b.JG_G_15, a.ETC2, d.BIGO, a.DUTY_FREE_OPT,
+		    a.JG_TUIX_ST, a.LKAS_YN, a.LDWS_YN, a.AEB_YN, a.FCW_YN, a.HOOK_YN 
+		FROM 
+			amazoncar.car_nm a, amazoncar.ESTI_JG_VAR b, 
+			(SELECT sh_code, MAX(seq) seq FROM amazoncar.ESTI_JG_VAR WHERE reg_dt <= to_char(sysdate,'yyyymmdd') GROUP BY sh_code) c,
+			amazoncar.code d
+		WHERE 
+			a.jg_code = b.sh_code
+			AND a.car_comp_id = #{carCompId}
+			AND a.car_cd = #{carCode}
+			AND REG_DT <= to_char(sysdate,'yyyymmdd')
+			AND a.car_id=#{carId}
+			AND a.car_seq=#{carSeq}
+			AND b.sh_code=c.sh_code AND b.seq=c.seq  
+			AND a.car_comp_id = d.code AND d.c_st = '0001'
+	]]>
+	</select>
+	
+	<select id="selectSecondhandCompareData" parameterType="string" resultType="hashmap">
+		SELECT 
+			*
+		FROM 
+			amazoncar.ESTI_COMPARE_SH
+		WHERE 
+			EST_ID=#{estimateId}
+		UNION
+		SELECT 
+			*
+		FROM 
+			amazoncar.ESTI_COMPARE_CU
+		WHERE 
+			EST_ID = #{estimateId}
+	</select>
+	
+	<select id="selectMainCarCompareData" parameterType="string" resultType="hashmap">
+		SELECT 
+			*
+		FROM 
+			amazoncar.ESTI_COMPARE_HP
+		WHERE 
+			EST_ID=#{estimateId}
+	</select>
+	
+	<select id="selectDomesticRentDetail_smart" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			a.car_comp_id as CAR_COMP_ID, b.nm as CAR_COMP_NM, a.code as CODE, a.car_cd as CAR_CD,
+			a.car_nm as CAR_NM, c.car_id as CAR_ID,c.car_name as CAR_NAME, c.use_yn as CAR_YN, c.SECTION, c.car_y_form,
+			c.CAR_SEQ, c.CAR_B, c.CAR_B_P, c.CAR_B_DT, c.dpm, c.max_le_36, c.max_le_24, c.max_le_12, c.max_re_36, c.max_re_24, c.max_re_18,
+			c.s_st, c.est_yn, c.car_b_inc_id, c.car_b_inc_seq, sh_code, diesel_yn, auto_yn, c.jg_code, c.end_dt, c.duty_free_opt
+		FROM 
+			amazoncar.car_mng a, amazoncar.code b, amazoncar.car_nm c
+		WHERE 
+			a.car_comp_id=c.car_comp_id and a.code=c.car_cd
+		   	AND a.car_comp_id=b.code and b.c_st = '0001'
+		   	AND c.car_id = #{carId}
+		   	AND c.car_seq = #{carSeq}
+	</select>
+	
+	<select id="selectSecondhandBaseData" parameterType="String" resultType="hashmap">
+		SELECT 
+			b.CAR_Y_FORM, b.CAR_END_DT, b.dpm,
+			DECODE(b.car_use,'2',48,TRUNC(MONTHS_BETWEEN(TO_date(b.car_end_dt,'YYYYMMDD'),sysdate))) max_use_mon,
+			a.*
+		FROM   
+			amazoncar.sh_base a, amazoncar.car_reg b
+		WHERE  
+			a.car_mng_id=#{carManagedId}
+		  	AND  a.CAR_MNG_ID = b.CAR_MNG_ID
+	</select>
+
+	<select id="selectCarDcAmt" parameterType="hashmap" resultType="hashmap">
+		SELECT  
+		 	a.car_b_dt, a.car_d_seq, a.car_d_dt, a.car_d_p, a.car_d_per, a.car_d_p2, a.car_d_per2, a.ls_yn, a.car_d, a.car_d_per_b, a.car_d_per_b2, a.car_d_dt2, '' etc, '' car_y_form, '' jg_b, '' jg_opt_st
+		FROM   
+		 	amazoncar.CAR_DC a,
+			(select car_comp_id, car_cd, max(car_d_dt) car_d_dt, max(car_d_seq) car_d_seq from amazoncar.car_dc WHERE SUBSTR(car_d_dt,1,6) >=TO_CHAR(ADD_MONTHS(SYSDATE,-1),'YYYYMM') group by car_comp_id, car_cd) c 
+		WHERE  a.car_comp_id=#{carCompId}
+		    AND  a.car_cd=#{carCode}
+			AND  a.car_comp_id=c.car_comp_id AND a.car_cd=c.car_cd AND a.car_d_dt=c.car_d_dt and a.car_d_seq=c.car_d_seq
+	   	ORDER BY  
+	   		a.car_d_dt desc, a.car_d_seq
+	</select>
+	
+	<select id="selectReceiveHistory" parameterType="string" resultType="hashmap">
+		SELECT 
+			a.car_mng_id, e.car_off_nm, b.SH_INIT_REG_DT, c.sh_base_dt, '자산양수 차량' as driver, b.accid_serv_amt, b.accid_serv_cont 
+		FROM   
+			amazoncar.cont a, amazoncar.car_etc b, amazoncar.commi c, amazoncar.car_off_emp d, amazoncar.car_off e 
+		WHERE  
+			a.car_gu='2' AND a.car_mng_id=#{carManagedId}
+		   	AND a.rent_mng_id=b.rent_mng_id AND a.rent_l_cd=b.rent_l_cd
+		   	AND a.rent_mng_id=c.rent_mng_id AND a.rent_l_cd=c.rent_l_cd AND c.AGNT_ST='6'
+		   	AND c.emp_id=d.emp_id
+		   	AND d.car_off_id=e.car_off_id
+	</select>
+	
+	<select id="selectAttachFile" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			*
+		FROM 
+			amazoncar.ACAR_ATTACH_FILE 
+		WHERE 
+			CONTENT_CODE = #{contentCode}
+		   	AND CONTENT_SEQ = #{contentSeq}
+		   	AND ISDELETED = 'N'
+	</select>
+	
+	<select id="selectAttachFileList" parameterType="hashmap" resultType="hashmap">
+		SELECT  
+			*
+		FROM  
+			amazoncar.ACAR_ATTACH_FILE
+		WHERE  
+			CONTENT_CODE = #{contentCode}
+		   	AND  CONTENT_SEQ LIKE #{contentSeq} || '%'
+		   	AND  ISDELETED = 'N'
+	  	ORDER BY  
+	  		REG_DATE ,SEQ
+	</select>
+	
+	<select id="selectDriverList" parameterType="String" resultType="hashmap">
+		SELECT 
+			*
+		FROM 
+			amazoncar.ESTI_MGR
+		WHERE 
+			EST_ID = #{estimateId}
+	</select>
+	
+	<select id="selectReversionStatus" parameterType="String" resultType="String">
+		SELECT SITUATION FROM amazoncar.SH_RES WHERE EST_ID = #{estimateId}
+	</select>
+	
+	
+	<select id="checkReserveCount" parameterType="hashmap" resultType="int">
+	<![CDATA[
+		SELECT COUNT(*)
+ 		  FROM amazoncar.V_MMRENT 
+		 WHERE car_st='2'
+		   AND situation is null and car_mng_id is not null and car_st='2' 
+		   AND h_car_mng_id is null and i_car_mng_id is null
+		   AND off_ls not in ('1','3') and nvl(rm_st,'0')<>'3'		
+		   AND decode(nvl(use_yn,'Y')||car_st||rent_start_dt,'Y4','N','Y')='Y'
+	]]>
+		   AND car_mng_id = #{carManagedId}
+		   AND RENT_MNG_ID = #{rentManagedId}
+		   AND RENT_L_CD = #{rentLocationCode}
+	</select>
+	
+	<!-- 월렌트 차량 예약시 고객에게 문자(SMS) 보내기 -->
+	<!-- 문자 발송 시간은 insert 후 약 4~5초 뒤에 발송되게 하드코딩 -->
+	<insert id="insertSendSMSForReserve" parameterType="hashmap">
+		INSERT INTO amazoncar.UMS_DATA
+			( CMID, SEND_PHONE, SEND_NAME, DEST_PHONE, DEST_NAME, REQUEST_TIME, STATUS, MSG_TYPE, SUBJECT, MSG_BODY )
+		VALUES
+			( to_char(sysdate,'YYYYMMDDhh24miss'), #{send_phone}, #{send_name}, #{dest_phone}, #{dest_name}, to_char(sysdate+0.00005,'YYYYMMDDhh24miss'), #{status}, #{msg_type}, #{subject}, #{msg_body})	
+	</insert>
+	
+	<!-- 색상 비고 FETCH 1단계(car_id로 jg_code 구하기)-->
+	<select id="selectJangaCode" parameterType="String" resultType="String">
+		SELECT c.jg_code
+		  	FROM amazoncar.car_mng a, amazoncar.code b, amazoncar.car_nm c
+		 	WHERE a.car_comp_id=c.car_comp_id AND a.code=c.car_cd
+			  AND a.car_comp_id=b.code AND b.c_st = '0001'
+              AND c.car_id = #{carId} AND c.use_yn='Y' AND c.car_b_dt = (SELECT car_b_dt FROM amazoncar.car_nm WHERE car_id=#{carId} AND use_yn='Y' AND est_yn='Y' AND hp_yn='Y') <!-- max(car_b_dt) -->
+     	    ORDER BY c.car_name	
+	</select>
+	
+	<!-- 색상 비고 FETCH 2단계(jg_code로 esti_jg_var 테이블 조회)-->
+	<select id="selectEstiJgVar" parameterType="String" resultType="hashmap">
+		SELECT * FROM amazoncar.esti_jg_var WHERE sh_code=#{jgCode}
+           AND seq = (SELECT max(seq) FROM amazoncar.esti_jg_var WHERE sh_code=#{jgCode})
+	
+	</select>
+	
+	<!-- 색상 비고 FETCH 3단계(esti_jg_opt_var 테이블 조회)-->
+	<select id="selectEstiJgOptVar" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM amazoncar.esti_jg_opt_var WHERE sh_code=#{jgCode} AND seq=#{seq} AND jg_opt_st=#{jgOptSt}	
+	</select>
+	
+	<!-- 월렌트 차량 하나의 정보를 FETCH -->
+	<select id="getMRentCarInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT BR_ID, BR_NM FROM amazoncar.V_MMRENT WHERE CAR_MNG_ID = #{carManagedId}
+			 AND RENT_MNG_ID = #{rentManagedId}
+			 AND RENT_L_CD = #{rentLocationCode}
+	</select>
+	
+	<!-- estimate_cu 여러건 묶음 정보를 fetch(20190212)-->
+	<select id="getABTypeEstIds2" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM amazoncar.ESTIMATE_CU WHERE EH_CODE = #{eh_code} AND JOB='org' ORDER BY RETURN_SELECT
+	</select>
+	
+	<!-- estimate_hp 여러건 묶음 정보를 fetch(20190212)-->
+	<select id="getABTypeEstIds3" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM amazoncar.ESTIMATE_HP WHERE EH_CODE IN (SELECT EH_CODE FROM amazoncar.ESTIMATE_HP WHERE EST_ID=#{estimateId}) ORDER BY RETURN_SELECT
+	</select>
+	
+	<select id="selectAccidCarDetail" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			DISTINCT b.rent_mng_id, b.rent_l_cd, b.car_mng_id, b.client_id, e.car_no, a.firm_nm, c.br_id, c.user_id, c.user_nm, REPLACE(c.user_m_tel,'-','') user_m_tel, c.ars_group 
+		FROM   
+			amazoncar.client a, amazoncar.cont b, amazoncar.users c, amazoncar.car_reg e 
+		WHERE  
+	 		a.client_id=b.client_id 
+	 		AND b.car_mng_id=e.car_mng_id 
+	 		AND b.bus_id2=c.user_id 
+	 		AND (b.use_yn='Y' OR b.use_yn IS null) 
+	 		AND b.car_st<>'2'
+			AND e.car_no LIKE #{car_no}
+	]]>
+	</select>
+	
+	<select id="getCompIdByCarName" parameterType="String" resultType="String">
+		SELECT DISTINCT car_comp_id
+		FROM amazoncar.MAIN_CAR
+		WHERE AB_NM = #{carName}
+	</select>
+	
+</mapper>

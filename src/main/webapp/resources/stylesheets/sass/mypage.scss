@@ -1,0 +1,74 @@
+table.mypage-list{
+  width:100%;
+}
+
+table.mypage-list > tbody > tr:hover {
+  cursor:pointer;
+}
+
+.mypage-list .hover-style{
+  background-color:#ffffff;
+}
+
+.mypage-list-sub-head th{
+  background-color:#C9C9C9;
+}
+
+.mypage-list-rightest-item{
+  border-right:1px solid #ababab;
+}
+
+.mypage-list-rightest-item-light{
+  border-right:1px solid #ddd !important;
+}
+
+table.mypage-list>thead>tr{
+  background-color:#E9E9E9;
+  border-top:1px solid #ababab;
+  border-bottom:1px solid #ababab;
+  height:35px;
+  color:#4a4a4a;
+  font-size:14px;
+}
+
+table.mypage-list th{
+  text-align:center;
+}
+
+table.mypage-list > tbody > tr {
+  height:50px;
+  border-bottom:2px solid #ddd;
+  text-align:center;
+}
+
+table.mypage-list .mypage-list-left {
+  text-align:left;
+}
+
+table.mypage-list > tbody > tr.mypage-list-answer {
+  text-align:left;
+}
+
+table.mypage-list td {
+  color:#424242;
+}
+
+.mypage-info-submit {
+  margin-top: 30px;
+}
+
+.mypage-list-oneline {
+  max-width: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.mypage-feedback-list-submit {
+  text-align: right;
+}
+
+.mypage-feedback-restore {
+  font-size: 16px;
+}

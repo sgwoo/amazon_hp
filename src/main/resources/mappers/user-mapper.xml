@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="userMapper">
+
+    <select id="getUserInfo" parameterType="hashmap" resultType="hashmap">
+        <![CDATA[
+            SELECT
+            	*
+            FROM
+                amazoncar.MOBILE_MEMBER
+            WHERE
+            	EMAIL = #{email}
+        ]]>
+    </select>
+    
+    <update id="updateUserInfo" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			BIRTH = #{birth},
+    			C_NAME = #{name},
+    			TEL = #{tel}
+    		WHERE 
+    			EMAIL = #{email}
+    	]]>
+    
+    </update>
+    
+    <update id="updateProviderInfo" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			PROVIDER = #{provider}
+    			,USE_YN = 'Y'
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+    </update>
+    
+    <insert id="insertComplainInfo" parameterType="hashmap">
+    	<![CDATA[
+			INSERT INTO amazoncar.OPINION (SEQ, GUBUN, NAME, TEL, EMAIL, HP_KEY, ACAR_USE, TITLE, CONTENTS, REG_DT)
+			SELECT MAX(SEQ)+1,
+				   'C',
+				   #{name},
+				   #{tel},
+				   #{email},
+				   #{hpKey},
+				   #{acar_use},
+				   #{title},
+				   #{content},
+				   sysdate
+			FROM amazoncar.OPINION 
+    	]]>
+    </insert>
+    
+    <select id="selectComplainList" parameterType="String"  resultType="hashmap">
+    	<![CDATA[
+    		SELECT
+    			NAME,
+    			TEL,
+    			EMAIL,
+    			ACAR_USE,
+    			TITLE,
+    			CONTENTS,
+    			TO_CHAR(REG_DT,'YYYY-MM-DD') AS REG_DT,
+    			ANSWER,
+    			ANS_ID,
+    			TO_CHAR(ANS_DT,'YYYY-MM-DD') AS ANS_DT
+    		FROM 
+    			amazoncar.OPINION
+    		WHERE
+    			EMAIL = #{email}
+    		ORDER BY
+    			REG_DT DESC
+    	]]>
+    </select>
+    
+    <update id="updateTokenInfo" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE
+    			amazoncar.MOBILE_MEMBER
+    		SET
+    			REGID = #{token}
+    		WHERE
+    			EMAIL = #{email}
+    		
+    	]]>
+    </update>
+    
+   <insert id ="insertEmailInfo" parameterType="com.amazon.hp.util.EmailFormatter">
+    		INSERT INTO
+    			amazoncar.IM_DMAIL_INFO_7
+    			(SEQIDX,
+    			 SUBJECT,
+    			 QRY,
+    			 REJECT_SLIST_IDX,
+    			 BLOCK_GROUP_IDX,
+    			 MAILFROM,
+    			 MAILTO,
+    			 REPLYTO,
+    			 ERRORSTO,
+    			 HTML,
+    			 ENCODING,
+    			 CHARSET,
+    			 SDATE,
+    			 TDATE,
+    			 DURATION_SET,
+    			 CLICK_SET,
+    			 SITE_SET,
+    			 ATC_SET,
+    			 GUBUN,
+    			 GUBUN2,
+    			 RNAME,
+    			 MTYPE,
+    			 U_IDX,
+    			 G_IDX,
+    			 MSGFLAG,
+    			 CONTENT,
+    			 SQL)
+    		VALUES (
+    				amazoncar.IM_SEQ_DMAIL_INFO_7.NEXTVAL,
+    				#{subject},#{sql},#{rejectSlistIdx},#{blockGroupIdx},
+    				#{mailFrom}, #{mailTo}, #{replyTo}, #{errorsTo},
+    				#{html}, #{encoding}, #{charset}, to_char(sysdate,'YYYYMMDDhh24miss'), to_char(sysdate+7,'YYYYMMDDhh24miss'),
+    				#{durationSet}, #{clickSet}, #{siteSet}, #{atcSet},
+    				#{gubun}, #{gubun2,jdbcType=VARCHAR}, #{rName}, #{mType}, #{uIdx}, #{gIdx}, #{msgFlag}, #{content}, #{sql}
+    			)
+    </insert>
+    
+    <update id="updatePassword" parameterType="hashmap">
+    	<![CDATA[
+    		UPDATE 
+    			amazoncar.MOBILE_MEMBER
+    		SET 
+    			REGID = null,
+    			PASSWD = #{password}
+    		WHERE
+    			EMAIL = #{email}
+    	]]>
+    </update>
+    
+    <select id="selectToken" parameterType="hashmap" resultType="String">
+    	<![CDATA[
+    		SELECT  EMAIL
+    		FROM	 amazoncar.MOBILE_MEMBER
+    		WHERE   REGID = #{token}
+    	]]>
+    </select>
+    
+    
+	<select id="selectIdxToMessenger" resultType="int">
+		<!-- SELECT AVIEW.ALERTKEY.NEXTVAL -->
+		SELECT CVIEW.ALERTKEY.NEXTVAL
+		FROM DUAL
+	</select>
+
+	<insert id="insertMessengerData" parameterType="hashmap">
+		<!-- INSERT INTO	AVIEW.CD_ALERT -->
+		INSERT INTO	CVIEW.CD_ALERT
+					(fldidx, flddata, fldtype,fldwritedate)
+			   VALUES (
+			   	 	#{idx}, #{xmlData}, #{type}, sysdate
+			   )
+	</insert>
+	
+	<select id="checkEmailExists" parameterType="String" resultType="int">
+		SELECT COUNT(AUTH_YN)
+		FROM amazoncar.HP_MEMBER
+		WHERE EMAIL = #{email}
+		  AND AUTH_YN = 'Y'
+	</select>
+	
+	<insert id="insertAuthRequestEmail" parameterType="hashmap">
+		INSERT INTO amazoncar.HP_MEMBER
+					(SEQ,
+					 EMAIL,
+					 TOKEN,
+					 AUTH_YN,
+					 EST_COUNT,
+					 SEND_DT)
+			VALUES ( 
+					 amazoncar.MEMBER_SEQ.NEXTVAL,
+					 #{email},
+					 #{token},
+					 'N',
+					 0,
+					 #{tokenDate}
+				    )
+	</insert>
+    
+    <select id="selectAuthTokenInfo" parameterType="hashmap" resultType="hashmap">
+    	SELECT * 
+    	FROM amazoncar.HP_MEMBER 
+    	WHERE TOKEN = #{token}
+    	AND SEND_DT = #{tokenDate}
+    	AND EMAIL = #{email}
+    </select>
+    
+    <update id="updateAuthInfo" parameterType="hashmap">
+    	UPDATE amazoncar.HP_MEMBER
+    		SET AUTH_YN = 'Y',
+    			AUTH_DT = sysdate,
+    			TOKEN = NULL
+    	WHERE EMAIL = #{email}
+    	  AND SEND_DT = #{tokenDate}
+    	  AND TOKEN = #{token}
+    </update>
+    
+    <update id="updateEstimateCount" parameterType="hashmap">
+    	UPDATE amazoncar.HP_MEMBER
+    		SET EST_COUNT = ( SELECT  <if test="type eq 'step1'"> MAX(EST_COUNT) +1 </if> 
+    								  <if test="type eq 'step2'"> MAX(EST_COUNT) -1 </if>
+    						    FROM amazoncar.HP_MEMBER 
+    						   WHERE EMAIL = #{email}
+    						     AND AUTH_YN = 'Y' ),
+   				LAST_EST_DT = SYSDATE    						     
+		  WHERE EMAIL = #{email}
+		  AND   AUTH_YN = 'Y'
+    </update>
+    
+    <select id="selectEstimateCount" parameterType="String" resultType="int">
+    	SELECT EST_COUNT 
+    	  FROM amazoncar.HP_MEMBER 
+    	 WHERE EMAIL = #{email}
+    	   AND AUTH_YN = 'Y'
+    </select>
+    
+    <select id="selectReserveCount" parameterType="String" resultType="int">
+    <!-- <![CDATA[
+    	SELECT count(0)
+    	FROM   ESTI_SPE A, SH_RES B
+    	WHERE  A.EST_EMAIL = #{email}
+    	  AND  A.EST_ID = B.EST_ID 
+    	  AND  (B.USE_YN IS NULL OR B.USE_YN='Y')
+    	  AND  (NVL(B.RES_ST_DT,'00000000') <= to_char(sysdate,'YYYYMMDD') and NVL(B.RES_END_DT,'99999999') >= to_char(sysdate,'YYYYMMDD'))
+    ]]> -->	
+    	SELECT count(0)
+          FROM amazoncar.ESTI_SPE A, amazoncar.SH_RES B
+          WHERE A.EST_EMAIL = #{email}
+            AND A.EST_ID = B.EST_ID           
+            AND (B.USE_YN IS NULL OR (B.USE_YN='Y' AND to_char(sysdate,'YYYYMMDD') BETWEEN B.RES_ST_DT and B.RES_END_DT))  
+    </select>
+    
+    <select id="checkHoliday" parameterType="String" resultType="int">
+    	SELECT COUNT(*)
+    	  FROM amazoncar.HOLIDAY 
+    	 WHERE HDAY LIKE #{date}
+    </select>
+    
+    <select id="selectDamdangEmpList" parameterType="hashmap" resultType="hashmap">
+    	SELECT USER_ID, USER_NM, ID
+    	  FROM amazoncar.USERS
+    	 WHERE USE_YN = 'Y'
+    	<choose>
+    		<when test="mode eq 'MESSAGE_S1'">	and  DEPT_ID in ('0001') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_S2'">	and  DEPT_ID in ('0009') and M_IO = 'Y'		</when>
+			<when test="mode eq 'MESSAGE_S5'"> and  DEPT_ID in ('0017') and M_IO = 'Y'     </when>
+    		<when test="mode eq 'MESSAGE_S6'">	and  DEPT_ID in ('0018') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_I1'"> and  DEPT_ID in ('0012') and M_IO = 'Y'		</when>
+    		<!-- S1,2,3,4,5,6, I1(인천) 들 수도권으로 통합처리!! VV -->
+    		<!-- <when test="mode eq 'MESSAGE_S1' or mode eq 'MESSAGE_S2' or mode eq 'MESSAGE_S3' or mode eq 'MESSAGE_S4' or mode eq 'MESSAGE_S5' or mode eq 'MESSAGE_S6' or mode eq 'MESSAGE_I1'">	
+ 				and  DEPT_ID in ('0001', '0009', '0017', '0018', '0012') and M_IO = 'Y'		
+ 			</when> -->
+ 			<!-- 수도권 통합으로 바꿨다가 다시 기존 소스로 돌림(2017.12.21) -->
+ 			<!-- 지방 지점은 기존 그대로 유지  VV -->
+    		<when test="mode eq 'MESSAGE_B1'">	and  DEPT_ID in ('0007') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_D1'">	and  DEPT_ID in ('0008') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_J1'">	and  DEPT_ID in ('0010') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_G1'">	and  DEPT_ID in ('0011') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_K3'">	and  DEPT_ID in ('0013') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_null'">	and  DEPT_ID in ('notSearch') and M_IO = 'Y'		</when>
+    	</choose>
+    	ORDER BY DEPT_ID, decode(user_pos,'사원',1,0)
+    </select>
+    
+    <select id="selectDamdangEmpList2" parameterType="hashmap" resultType="hashmap">
+    	SELECT USER_ID, USER_NM, ID
+    	  FROM amazoncar.USERS
+    	 WHERE USE_YN = 'Y'
+    	<choose>
+    		<!-- <when test="mode eq 'MESSAGE_S1'">	and  DEPT_ID in ('0001') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_S2'">	and  DEPT_ID in ('0009') and M_IO = 'Y'		</when>
+			<when test="mode eq 'MESSAGE_S5'"> and  DEPT_ID in ('0017') and M_IO = 'Y'     </when>
+    		<when test="mode eq 'MESSAGE_S6'">	and  DEPT_ID in ('0018') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_I1'"> and  DEPT_ID in ('0012') and M_IO = 'Y'		</when> -->
+    		<!-- S1,2,3,4,5,6, I1(인천), k3(강원) 들 수도권으로 통합처리!! -->
+    		<when test="mode eq 'MESSAGE_S1'">	
+ 				and  DEPT_ID in ('0001', '0009', '0017', '0018', '0012', '0013') and M_IO = 'Y'		
+ 			</when>
+ 			<!-- 지방 지점은 기존 그대로 유지 -->
+    		<when test="mode eq 'MESSAGE_B1'">	and  DEPT_ID in ('0007') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_D1'">	and  DEPT_ID in ('0008') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_J1'">	and  DEPT_ID in ('0010') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_G1'">	and  DEPT_ID in ('0011') and M_IO = 'Y'		</when>
+    		<when test="mode eq 'MESSAGE_null'"> and  DEPT_ID in ('notSearch') and M_IO = 'Y'	</when>
+    	</choose>
+    	ORDER BY DEPT_ID, decode(user_pos,'사원',1,0)
+    </select>
+    
+    <!-- 월렌트 예약확인 메일 템플릿 컨텐츠를 FETCH(2017.12.26) -->
+	<select id="getTemplateList" resultType="hashmap">
+		SELECT NO, CAT, SHOW_LIST, CODE, NAME, CONTENT, ORG_NAME, ORG_UUID, DESCRIPTION, USE_YN 
+          FROM amazoncar.ATA_TEMPLATE 
+          WHERE 1=1 
+            <!-- AND SHOW_LIST = 'Y' --> 
+            AND use_yn = 'Y'
+            AND CODE = 'acar0097'	<!-- 월렌트예약 확인(홈페이지)용 코드 -->
+	</select>
+	
+	<!-- 월렌트 예약확인 메일 - FMS의 알림톡 템플릿을 적용(2017.12.26) -->
+	<insert id="insertConfResEmail" parameterType="hashmap">
+		INSERT INTO biztalk.ATA_MMT_TRAN (  
+                    mt_pr, template_code, subject, content, recipient_num, 
+                    date_client_req, callback, sender_key, etc_text_1, etc_text_2  
+                )
+                VALUES ( 
+                    biztalk.SQ_ATA_MMT_TRAN_01.NEXTVAL, #{template_code}, #{subject}, #{content}, #{dest_phone}, 
+                    #{date_client_req}, #{send_phone}, #{sender_key}, #{l_cd}, #{send_name}  
+                )
+	</insert>
+	
+	<!-- 현재날짜 당직자 구하기 -->
+	<!-- watch_type = '1' : 본사   
+			 member  : 본사 야간당직자		member2 : 					member3 : 본사 주간당직자1		member4 : 본사 주간당직자2
+			 member5 : 					member6 : 강서/구로 주간당직자		member7 : 종로/송파 주간당직자1	member8 : 종로/송파 주간당직자2
+		 watch_type = '5' : 수도권남부            
+			 member  : 					member2 : 					member3 : 인처지점 주간당직자		member4 : 수원지점 주간당직자
+			 member5 : 강남지점 주간당직자		member6 : 					member7 :					member8 :
+		 watch_type = '3' : 지점1(부산/대구)            
+			 member  : 지점1 야간당직자		member2 : 					member3 : 					member4 : 
+			 member5 : 부산 주간(월렌트)당직자	member6 : 대구 주간(월렌트)당직자	member7 : 					member8 :
+		 watch_type = '4' : 지점2(대전/광주)            
+		 	 member  :					member2 : 					member3 : 					member4 : 
+			 member5 : 대전 주간(월렌트)당직자	member6 : 광주 주간(월렌트)당직자	member7 : 					member8 :
+	 -->
+	<select id="selectDangjikList" parameterType="hashmap" resultType="hashmap">
+    	SELECT a.*,	   
+			   b.id as id1, b.user_nm as member_nm1, b.user_m_tel as user_m_tel1, b.in_tel as in_tel1, b.user_email as member_email1,
+    		   c.id as id2, c.user_nm as member_nm2, c.user_m_tel as user_m_tel2, c.in_tel as in_tel2,  
+ 			   d.id as id3, d.user_nm as member_nm3, d.user_m_tel as user_m_tel3, d.in_tel as in_tel3,
+ 			   e.id as id4, e.user_nm as member_nm4, e.user_m_tel as user_m_tel4, e.in_tel as in_tel4, 
+    		   f.id as id5, f.user_nm AS member_nm5, f.user_m_tel AS user_m_tel5, f.in_tel AS in_tel5,  
+    		   g.id as id6, g.user_nm AS member_nm6, g.user_m_tel AS user_m_tel6, g.in_tel AS in_tel6, 
+			   h.id as id7, h.user_nm AS member_nm7, h.user_m_tel AS user_m_tel7, h.in_tel as in_tel7,
+			   i.id as id8, i.user_nm AS member_nm8, i.user_m_tel AS user_m_tel8, i.in_tel as in_tel8
+    	  FROM amazoncar.sch_watch a, amazoncar.users b, amazoncar.users c, amazoncar.users d, amazoncar.users e, amazoncar.users f, amazoncar.users g, amazoncar.users h, amazoncar.users i	
+    	  WHERE a.start_year=#{year} AND a.start_mon=#{month} AND a.start_day=#{date} AND a.watch_type = #{watch_type}
+    	  		AND a.member_id=b.user_id(+) AND a.member_id2=c.user_id(+) AND a.member_id3=d.user_id(+) 
+    	  		AND a.member_id4=e.user_id(+)  AND a.member_id5=f.user_id(+) AND a.member_id6=g.user_id(+) 
+    	  		AND a.member_id7=h.user_id(+) AND a.member_id8=i.user_id(+)
+    </select>
+    
+    <!-- 지점 정보를 fetch -->
+	<select id="selectBranch" parameterType="String" resultType="hashmap">
+    	SELECT *
+    	  FROM amazoncar.branch	
+    	  WHERE br_id = #{br_id}
+    </select>
+    
+    <!-- 채용공고 - 회사개요 -->
+	<select id="selectComInfo" resultType="hashmap">
+    	SELECT
+			reg_id,
+			rc_no,
+			rc_cur_dt,
+			rc_tot_capital,
+			rc_tot_asset,
+			rc_sales,
+			rc_per_off,
+			rc_per_off_per,
+			rc_num_com,
+			rc_busi_rank
+		FROM
+			amazoncar.INSA_RC_INFO
+		ORDER BY
+			RC_NO DESC
+    </select>
+    
+    <!-- 채용공고 - 직무내용 -->
+	<select id="selectRecruitmentList" resultType="hashmap">
+    	SELECT
+			reg_id,
+			rc_no,
+			rc_job,
+			rc_job_cont
+		FROM
+			amazoncar.INSA_RC_JOB
+		ORDER BY
+			RC_NO
+    </select>
+    
+    <!-- 채용공고 - 지원자격/근무조건 -->
+	<select id="selectQualificationList" resultType="hashmap">
+    	SELECT
+			reg_id,
+			rc_no,
+			rc_edu,
+			rc_qf_var1,
+			rc_qf_var2,
+			rc_qf_var3,
+			rc_qf_var4,
+			rc_qf_var5,
+			rc_qf_var6,
+			rc_qf_var7,
+			rc_qf_var8,
+			rc_qf_var9
+		FROM
+			amazoncar.INSA_RC_QF
+		ORDER BY
+			RC_NO
+    </select>
+    
+    <!-- 채용공고 - 복리후생 -->
+	<select id="selectBenefitList" resultType="hashmap">
+    	SELECT
+			reg_id,
+			rc_no,
+			rc_bene_cont,
+			rc_bene_st
+		FROM
+			amazoncar.INSA_RC_BENEFIT
+		ORDER BY
+			RC_NO
+    </select>
+    
+    <!-- 채용공고 -->
+	<select id="selectRecruitList" resultType="hashmap">
+    	SELECT
+			rownum idx,
+			t.*
+		FROM
+			(
+			SELECT
+				a.rc_no,
+				a.reg_id,
+				b.user_nm AS rc_name,
+				a.rc_title,
+				a.rc_branch,
+				a.rc_type,
+				a.rc_hire_per,
+				a.rc_bran_addr,
+				a.rc_bran_tel,
+				a.rc_job_contA,
+				a.rc_job_contB,
+				a.rc_job_contC,
+				a.rc_job_contD,
+				a.rc_apl_st_dt,
+				a.rc_apl_ed_dt,
+				a.rc_pass_dt,
+				a.rc_apl_mat,
+				a.rc_manager,
+				a.rc_tel,
+				TO_CHAR(a.rc_reg_dt, 'YYYY-MM-DD') rc_reg_dt,
+				a.rc_edu,
+				c.RC_JOB,
+				c.RC_JOB_CONT,
+				d.RC_QF_VAR1,
+				d.RC_QF_VAR2,
+				d.RC_QF_VAR3,
+				d.RC_QF_VAR4,
+				d.RC_QF_VAR5,
+				d.RC_QF_VAR6,
+				d.RC_QF_VAR7,
+				d.RC_QF_VAR8,
+				d.RC_QF_VAR9,
+				e.BR_ADDR,
+				e.TEL,
+				e.br_nm, 
+				f.rc_nm, 
+				h.RC_BENE_CONT, 
+				g.rc_nm edu_nm
+			FROM
+				amazoncar.INSA_RC_RECRUIT a,
+				amazoncar.users b,
+				amazoncar.INSA_RC_JOB c,
+				amazoncar.INSA_RC_QF d,
+				amazoncar.branch e,
+				(SELECT * FROM amazoncar.insa_rc_code WHERE rc_gubun = '1') f,
+				(SELECT * FROM amazoncar.insa_rc_code WHERE rc_gubun = '2') g,
+				amazoncar.INSA_RC_BENEFIT h
+			WHERE
+				a.reg_id = b.user_id
+				AND a.rc_type = c.rc_job
+				AND a.rc_edu = d.rc_edu
+				AND a.rc_branch = e.br_nm(+)
+				AND a.rc_type = f.rc_code 
+				AND a.rc_type = h.rc_bene_st
+				AND a.rc_edu = g.rc_code(+)
+				AND a.rc_apl_ed_dt >= TO_CHAR(SYSDATE, 'YYYYMMDD')
+			ORDER BY
+				a.rc_no DESC 
+		) t
+    </select>
+</mapper>

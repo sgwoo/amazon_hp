@@ -1,0 +1,882 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="estiMapper">
+
+	<insert id="insertEstimateData" parameterType="hashmap">
+		<!-- #{regDate},#{updateDate} -->
+		<![CDATA[
+			INSERT INTO amazoncar.ESTIMATE_CU
+						(
+               				EST_ID, EST_EMAIL, --견적서ID,견적EMAIL
+               				CAR_COMP_ID, CAR_CD, CAR_ID, CAR_SEQ, CAR_AMT, DC_SEQ, DC_AMT, CONTI_RAT, --차량기본정보
+               				ECAR_LOC_ST, ECAR_PUR_SUB_AMT, ECAR_PUR_SUB_ST, -- 친환경 관련
+               				OPT, OPT_SEQ, OPT_AMT, OPT_AMT_M, OPT_CHK, --옵션정보
+               				COL, COL_SEQ, COL_AMT, IN_COL, --색상정보 
+               				O_1, A_A, A_B, A_H, LOC_ST, UDT_ST, --total금액/상품구분/대여기간/차량인도지역
+               				AGREE_DIST, B_AGREE_DIST, --주행거리
+               				RO_13, RO_13_AMT,
+               				PP_AMT, PP_PER, --선납금정보
+               				RG_8, RG_8_AMT, PP_ST, --보증금정보
+               				GI_PER, GI_AMT, GI_YN, --보증보험정보
+               				INS_AGE, INS_DJ, --운전자연령/대물자손
+               				o_11, G_10, o_13, --영업수당,적용잔가/개시대여료
+				            CAR_JA, -- 자차면책금
+               				TINT_S_YN, TINT_N_YN, TINT_EB_YN, --차량용품
+               				REG_DT, UPDATE_DT, REG_CODE,SET_CODE, --등록정보
+               				EST_TYPE, JG_OPT_ST, JG_COL_ST,
+               				JOB, SPR_YN,
+               				INS_PER, --보험/피보험자
+               				RENT_DT, --기준 일자
+               				REG_ID, -- 등록자
+               				INS_GOOD, LPG_YN, FEE_DC_PER, TODAY_DIST, 
+               				DOC_TYPE, VALI_TYPE, FEE_OPT_AMT,
+               				CAROFF_EMP_YN,
+               				PRINT_TYPE, 
+               				CTR_S_AMT, CTR_V_AMT, SPE_DC_PER, 
+               				ACCID_SERV_AMT1, ACCID_SERV_AMT2, INSURANT, B_DIST,
+               				JG_TUIX_ST, JG_TUIX_OPT_ST, ETC, BIGO,
+               				RETURN_SELECT, HCAR_LOC_ST,
+               				LKAS_YN, LDWS_YN, AEB_YN, FCW_YN, HOOK_YN, HP_KEY, TAX_DC_AMT, ESTI_D_ETC, NEW_LICENSE_PLATE, GARNISH_YN
+				         )
+			VALUES		 (
+							 #{estId},#{loginEmail},
+               				 #{carCompId},#{carCode},#{carId},#{carSeq},#{carAmt},#{dcSeq},#{dcAmt, jdbcType=NUMERIC},#{contiRat, jdbcType=VARCHAR},
+               				 #{ecarLoc, jdbcType=VARCHAR}, #{ecarAmt,jdbcType=NUMERIC}, #{ecarST,jdbcType=NUMERIC},
+               				 #{optName},#{optSeq},#{optAmt},#{optAmt_m},#{optChk},
+               				 #{colorName},#{colorId},#{colorAmt},#{colorName_in},
+               				 #{o_1},#{a_a},#{a_b},#{a_h},#{loc_st},#{udt_st},
+               				 #{agreeDist},#{stdAgreeDist},
+               				 #{roPer, jdbcType=NUMERIC},#{roAmt, jdbcType=NUMERIC},
+               				 #{pp_amt},#{pp_per},
+               				 #{rg_8},#{rg_8_amt},#{ppStatus, jdbcType=NUMERIC},
+               				 #{gi_per},#{gi_amt, jdbcType=NUMERIC},#{gi_yn},
+               				 #{ins_age},#{ins_dj},
+               				 0,0,0,
+               				 #{car_ja},
+               				 #{tint_s_yn},#{tint_n_yn},#{tint_eb_yn},
+               				 TO_CHAR(SYSDATE, 'yyyyMMddHH24MI'),TO_CHAR(SYSDATE, 'yyyyMMdd'),#{regCode},#{regCode},
+               				 #{estType},#{jg_opt_st, jdbcType=VARCHAR},#{jg_col_st, jdbcType=VARCHAR},
+               				 #{job}, #{spr_yn},
+               				 #{ins_per},
+               				 #{rentDate},
+               				 #{regId},
+               				 0,0,0,0,
+               				 1,0,0,
+               				 1,
+               				 #{print_type},
+               				 0,0,0,
+               				 0,0,1,0,
+               				 #{jg_tuix_st, jdbcType=VARCHAR},#{jg_tuix_opt_st, jdbcType=VARCHAR},
+               				 #{car_etc, jdbcType=VARCHAR},replace(#{dc_bigo, jdbcType=VARCHAR},'+',' '),
+               				 #{return_select}, #{hcarLoc},
+               				 #{lkas_yn}, #{ldws_yn}, #{aeb_yn}, #{fcw_yn}, #{hook_yn}, #{loginEmail}, #{taxAmt}, #{esti_d_etc}, #{new_license_plate}, #{optionGarnishYn}
+						)
+			
+		]]>
+	</insert>
+
+	<insert id="insertEstiCompareData" parameterType="String">
+		<![CDATA[
+			insert into amazoncar.ESTI_COMPARE_CU ( EST_ID ) values ( #{estimateId} )
+		]]>
+	</insert>
+
+	<insert id="insertEstiExamData" parameterType="String">
+		<![CDATA[
+			insert into amazoncar.ESTI_EXAM_CU ( EST_ID ) values ( #{estimateId} )
+		]]>
+	</insert>
+	
+	<update id="callSpEstiRegEv" statementType="CALLABLE"
+		parameterType="hashmap">
+		{ call amazoncar.P_ESTI_REG_EV
+		(
+		#{regCode, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{jgStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{emStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{eaStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{estTable, mode=IN, jdbcType=VARCHAR, javaType=string}
+		)
+		}
+	</update>
+
+	<update id="calculateJanga" statementType="CALLABLE"
+		parameterType="hashmap">
+		{ call amazoncar.P_ESTI_JANGA
+		(
+		#{regCode, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{jgStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{emStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{eaStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{estTable, mode=IN, jdbcType=VARCHAR, javaType=string}
+		)
+		}
+	</update>
+
+	<update id="calculateFee" statementType="CALLABLE"
+		parameterType="hashmap">
+		{ call amazoncar.P_ESTI_FEEAMT
+		(
+		#{regCode, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{jgStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{emStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{eaStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{estTable, mode=IN, jdbcType=VARCHAR, javaType=string}
+		)
+		}
+	</update>
+
+	<update id="calculateClsper" statementType="CALLABLE"
+		parameterType="hashmap">
+		{ call amazoncar.P_ESTI_CLSPER
+		(
+		#{regCode, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{jgStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{emStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{eaStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{estTable, mode=IN, jdbcType=VARCHAR, javaType=string}
+		)
+		}
+	</update>
+
+	<update id="execMonthReserve" statementType="CALLABLE"
+		parameterType="hashmap">
+		{ call amazoncar.p_sh_res_dire_dtset
+		(
+		#{insertFlag, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{carManagedId, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{resSeq, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{resDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+		#{R_CHK, mode=OUT, jdbcType=VARCHAR, javaType=string}
+		)
+		}
+	</update>
+
+	<update id="updateCustomerInfo" parameterType="hashmap">
+		
+			UPDATE amazoncar.ESTIMATE_CU
+			SET EST_NM = #{estName},
+				EST_SSN = #{estSSN, jdbcType=VARCHAR},
+				EST_TEL = #{estTel, jdbcType=VARCHAR},
+				EST_FAX = #{estFax, jdbcType=VARCHAR},
+				EST_EMAIL = #{estEmail, jdbcType=VARCHAR},
+				HP_KEY = #{hpKey, jdbcType=VARCHAR},
+				DOC_TYPE = #{docType, jdbcType=VARCHAR}
+			WHERE EST_ID = #{estId}
+		
+	</update>
+	
+	<!-- 견적요청시 요청내용 정상 update 되었는지 체크 ^^^-->
+	<select id="checkCustomerInfo" parameterType="hashmap" resultType="Integer">
+		SELECT COUNT(*) 
+		FROM amazoncar.ESTIMATE_CU
+		WHERE EST_ID = #{estId}		
+		  <!-- AND EST_NM = #{estName} -->
+	</select>
+
+	<insert id="insertCustomerInfo" parameterType="hashmap" >
+		<!-- #{regSysDate} -->
+		<![CDATA[
+			INSERT INTO amazoncar.ESTI_SPE
+					(
+						 EST_ID, EST_ST, EST_NM, EST_SSN,
+						 EST_AREA, EST_TEL, EST_FAX, EST_EMAIL, HP_KEY,
+						 EST_AGNT, EST_BUS, EST_YEAR,DRIVER_YEAR,
+						 CAR_NM, ETC, 
+						 REG_DT, 
+						 ZIPCODE, ADDR1, ADDR2, BANK, ACCOUNT,URGEN_TEL,
+						 EST_COMP_CEO, EST_COMP_TEL, EST_COMP_CEL, CLIENT_YN --월렌트일 경우
+						 , CAR_USE_ADDR1, CAR_USE_ADDR2 
+					)
+					VALUES 
+					(
+					   	  #{estId}, #{estGubun}, #{estName}, #{estSSN, jdbcType=VARCHAR},
+					   	  #{estArea, jdbcType=VARCHAR}, #{estTel}, #{estFax, jdbcType=VARCHAR}, #{estEmail}, #{hpKey, jdbcType=VARCHAR},					   	  
+					   	  #{estAgent, jdbcType=VARCHAR}, #{estBusiness}, #{estBusinessYear, jdbcType=VARCHAR}, #{driverYear, jdbcType=VARCHAR}, 
+					   	  #{carName}, #{etc, jdbcType=VARCHAR}, 
+					   	  TO_CHAR(SYSDATE, 'yyyyMMddHH24MI'),
+					   	  #{zipcode, jdbcType=VARCHAR},#{addr1, jdbcType=VARCHAR},#{addr2, jdbcType=VARCHAR},
+					   	  #{bank, jdbcType=VARCHAR},#{account, jdbcType=VARCHAR},#{estUrgen, jdbcType=VARCHAR},
+					   	  #{estCEO,jdbcType=VARCHAR},#{estCompTel, jdbcType=VARCHAR},#{estCompCel,jdbcType=VARCHAR},#{client_yn,jdbcType=VARCHAR}
+					   	  ,#{car_use_addr1, jdbcType=VARCHAR},#{car_use_addr2, jdbcType=VARCHAR}
+					)
+		]]>
+	</insert>
+	
+	<!-- 견적요청시 요청내용 정상 insert 되었는지 체크 ^^^-->
+	<select id="checkCustomerInfo2" parameterType="hashmap" resultType="Integer">
+		SELECT COUNT(*) 
+		FROM amazoncar.ESTI_SPE
+		WHERE EST_ID = #{estId}		  
+	</select>
+
+	<update id="updateCustomerAccountInfo" parameterType="hashmap">
+		UPDATE
+		amazoncar.ESTI_SPE
+		SET BANK = #{bank},
+		ACCOUNT = #{account}
+		WHERE EST_ID = #{estimateId}
+	</update>
+
+	<update id="updateCustomerInfoToEsti" parameterType="hashmap">
+		UPDATE
+		amazoncar.ESTI_SPE
+		SET EST_NM = #{estName},
+		EST_SSN = #{estSSN, jdbcType=VARCHAR},
+		EST_AREA = #{estArea, jdbcType=VARCHAR},
+		EST_TEL = #{estTel, jdbcType=VARCHAR},
+		EST_FAX = #{estFax, jdbcType=VARCHAR},
+		EST_AGNT = #{estAgent, jdbcType=VARCHAR},
+		EST_BUS = #{estBusiness, jdbcType=VARCHAR},
+		EST_YEAR = #{estBusinessYear, jdbcType=VARCHAR},
+		DRIVER_YEAR = #{driverYear, jdbcType=VARCHAR},
+		ZIPCODE = #{zipcode, jdbcType=VARCHAR},
+		ADDR1 = #{addr1, jdbcType=VARCHAR},
+		ADDR2 = #{addr2, jdbcType=VARCHAR},
+		URGEN_TEL = #{estUrgen, jdbcType=VARCHAR},
+		EST_COMP_CEO = #{estCEO,jdbcType=VARCHAR},
+		EST_COMP_TEL = #{estCompTel, jdbcType=VARCHAR},
+		EST_COMP_CEL = #{estCompCel,jdbcType=VARCHAR},
+		ETC = #{etc,jdbcType=VARCHAR},
+		BANK = #{bank, jdbcType=VARCHAR},
+		ACCOUNT = #{account, jdbcType=VARCHAR}
+		WHERE EST_ID = #{estimateId}
+	</update>
+
+	<update id="updateCustomerInfoToShres" parameterType="hashmap">
+		UPDATE
+		amazoncar.SH_RES
+		SET CUST_NM = #{estName},
+		CUST_TEL = #{estTel, jdbcType=VARCHAR}
+		WHERE EST_ID = #{estimateId}
+	</update>
+
+	<update id="updateReserveSituation" parameterType="String">
+		UPDATE amazoncar.SH_RES
+		SET SITUATION = '2'
+		WHERE EST_ID = #{estimateId}
+	</update>
+
+	<insert id="insertDriverInfo" parameterType="hashmap">
+		INSERT INTO
+		amazoncar.ESTI_MGR(ID, EST_ID, SEQ, DRIVER_NM, DRIVER_NUM, DRIVER_CELL)
+		VALUES(
+		amazoncar.EST_MGR_SQ.NEXTVAL,
+		#{estimateId, jdbcType=VARCHAR},
+		#{seq, jdbcType=VARCHAR},
+		#{driverName, jdbcType=VARCHAR},
+		#{driverNumber, jdbcType=VARCHAR},
+		#{driverCell, jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<select id="selectShResSeq" parameterType="String" resultType="String">
+		SELECT SEQ
+		FROM amazoncar.SH_RES
+		WHERE EST_ID = #{estimateId}
+	</select>
+
+	<select id="selectCustomerInfo" parameterType="String" resultType="hashmap">
+		<![CDATA[
+			SELECT *
+			FROM amazoncar.ESTI_SPE
+			WHERE EST_ID = #{estimateId, jdbcType=VARCHAR}
+		]]>
+	</select>
+
+	<select id="selectCreatedEstimateInfo" parameterType="string" resultType="hashmap">
+		SELECT *
+		FROM amazoncar.ESTIMATE_HP
+		WHERE EST_ID = #{estimateId}
+		UNION
+		SELECT *
+		FROM amazoncar.ESTIMATE
+		WHERE EST_ID = #{estimateId}
+		UNION
+		SELECT *
+		FROM amazoncar.ESTIMATE_CU
+		WHERE EST_ID = #{estimateId}
+	</select>
+
+	<select id="selectSecondhandEstimateInfo" parameterType="string" resultType="hashmap">
+		SELECT *
+		FROM amazoncar.ESTIMATE_SH
+		WHERE EST_ID = #{estimateId}
+		UNION
+		SELECT *
+		FROM amazoncar.ESTIMATE_CU
+		WHERE EST_ID = #{estimateId}
+	</select>
+
+	<select id="selectSecondhandEstimateId" parameterType="hashmap" resultType="string">
+		SELECT a.est_id
+		<choose>
+			<when test="from eq 'step1'">
+				FROM amazoncar.estimate_cu a, amazoncar.esti_compare_cu b
+			</when>
+			<otherwise>
+				FROM amazoncar.estimate_sh a, amazoncar.esti_compare_sh b
+			</otherwise>
+		</choose>
+		WHERE a.est_type = 'S'
+		AND a.est_id=b.est_id
+		AND a.mgr_nm =
+		#{carManagedId}
+		AND a.a_a = #{a_a, jdbcType=CHAR}
+		AND a.a_b = #{a_b,
+		jdbcType=VARCHAR}
+		AND a.reg_code = #{regCode, jdbcType=VARCHAR}
+		AND
+		a.rent_dt = #{rentDate, jdbcType=CHAR}
+		<if test="type eq 'month'"> AND A.MGR_SSN = 'rm1'	</if>
+		<if test="type eq 'secondhand'"><![CDATA[	AND nvl(a.mgr_ssn,' ')<>'rm1' AND a.agree_dist = #{dist, jdbcType=VARCHAR}	]]></if>
+		and rownum = 1 <!-- 중복건 있는경우 있어서 추가(20180907) -->
+	</select>
+
+	<select id="selectRecentSecondhandEstimateId" parameterType="hashmap" resultType="string">
+		SELECT *
+		FROM (
+		SELECT A.EST_ID
+		FROM amazoncar.ESTIMATE_SH A, amazoncar.ESTI_COMPARE_SH B
+		WHERE A.EST_TYPE = 'S'
+		AND A.EST_ID = B.EST_ID
+		AND A.MGR_NM = #{carManagedId}
+	  <![CDATA[	   AND NVL(A.MGR_SSN,' ') <> 'rm1'		]]>
+		ORDER BY REG_DT DESC
+		)
+		WHERE ROWNUM = 1
+	</select>
+
+	<insert id="insertSecondhandEstimateData" parameterType="hashmap">
+		<!-- #{REG_DT}, #{UPDATE_DT} -->
+		INSERT INTO amazoncar.ESTIMATE_CU
+		(
+		EST_ID, EST_EMAIL,
+		CAR_COMP_ID, CAR_CD, CAR_ID, CAR_SEQ, CAR_AMT,
+		OPT, OPT_SEQ, OPT_AMT, COL, COL_SEQ, COL_AMT,
+		DC, DC_SEQ, DC_AMT,
+		O_1, A_A, A_B, A_H,
+		PP_ST, PP_AMT, PP_PER, RG_8, INS_GOOD,
+		INS_AGE, INS_DJ,
+		RO_13, G_10, CAR_JA, GI_AMT, GI_FEE, LPG_YN,
+		GI_YN, GTR_AMT, PP_S_AMT, PP_V_AMT, IFEE_S_AMT, IFEE_V_AMT,
+		FEE_S_AMT, FEE_V_AMT, REG_ID, REG_DT, UPDATE_ID, UPDATE_DT,
+		TALK_TEL, RO_13_AMT, RG_8_AMT,
+		FEE_DC_PER, SPR_YN, MGR_NM, MGR_SSN, JOB, 
+		RENT_DT, O_11, LPG_KIT, EST_ST,
+		EST_FROM, TODAY_DIST, O_13, UDT_ST, OVER_RUN_AMT,
+		AGREE_DIST, CLS_PER, <!-- RENT_MNG_ID, --> <!-- RENT_L_CD, --> RENT_ST,
+		REG_CODE, INS_PER, OVER_SERV_AMT, CLS_N_PER,
+		OVER_RUN_DAY, ONE_SELF, 
+		<!-- DOC_TYPE, --> <!-- VALI_TYPE, OPT_CHK, -->
+		FEE_OPT_AMT, GI_PER, SET_CODE, 
+		EST_TYPE,
+		CAROFF_EMP_YN, PRINT_TYPE, CTR_S_AMT, CTR_V_AMT,
+		USE_YN, COMPARE_YN, B_AGREE_DIST,
+		B_O_13, LOC_ST, TINT_B_YN, TINT_S_YN, TINT_N_YN, TINT_EB_YN,
+		SPE_DC_PER, IN_COL, BUS_YN, BUS_CAU,
+		ACCID_SERV_AMT1, ACCID_SERV_AMT2, ACCID_SERV_ZERO,
+		INSURANT, BUS_CAU_DT, CHA_ST_DT, B_DIST, JG_OPT_ST,
+		JG_COL_ST, BUS_CAU_SCORE, MAX_USE_MON, TAX_DC_AMT, 
+		ECAR_LOC_ST, ECAR_PUR_SUB_AMT, ECAR_PUR_SUB_ST,
+		TOT_DT,	<!-- 확인일자 추가 -->
+		JG_TUIX_ST, JG_TUIX_OPT_ST,	<!-- tuix 관련 값이 존재하면 insert 추가 (2017.07.07) -->
+		BR_TO, BR_FROM, BR_TO_ST		
+
+		)
+		VALUES (
+		#{EST_ID},#{loginEmail},
+		#{CAR_COMP_ID},#{CAR_CD},#{CAR_ID},#{CAR_SEQ},#{CAR_AMT},
+		#{OPT,jdbcType=VARCHAR},#{OPT_SEQ,jdbcType=VARCHAR},#{OPT_AMT,jdbcType=INTEGER},#{COL},#{COL_SEQ,jdbcType=VARCHAR},#{COL_AMT},
+		#{DC,jdbcType=VARCHAR},#{DC_SEQ,jdbcType=VARCHAR},#{DC_AMT,jdbcType=INTEGER},
+		#{O_1},#{A_A},#{A_B},#{A_H},
+		#{PP_ST,jdbcType=CHAR},#{PP_AMT,jdbcType=INTEGER},#{PP_PER,jdbcType=INTEGER},#{RG_8,jdbcType=INTEGER},#{INS_GOOD,jdbcType=CHAR},
+		#{INS_AGE},#{INS_DJ},
+		#{RO_13},#{G_10},#{CAR_JA},#{GI_AMT},#{GI_FEE},#{LPG_YN,jdbcType=CHAR},
+		#{GI_YN,jdbcType=CHAR},#{GTR_AMT,jdbcType=INTEGER},#{PP_S_AMT,jdbcType=INTEGER},#{PP_V_AMT,jdbcType=INTEGER},#{IFEE_S_AMT,jdbcType=INTEGER},#{IFEE_V_AMT,jdbcType=INTEGER},
+		#{FEE_S_AMT,jdbcType=INTEGER},#{FEE_V_AMT,jdbcType=INTEGER},#{REG_ID},TO_CHAR(SYSDATE, 'yyyyMMddHH24MI'),#{UPDATE_ID,jdbcType=VARCHAR},TO_CHAR(SYSDATE, 'yyyyMMdd'),
+		#{TALK_TEL,jdbcType=VARCHAR},#{RO_13_AMT},#{RG_8_AMT},
+		#{FEE_DC_PER,jdbcType=INTEGER},#{SPR_YN},#{carManagedId},#{MGR_SSN},#{JOB,jdbcType=VARCHAR},
+		#{RENT_DT},#{O_11},#{LPG_KIT,jdbcType=CHAR},#{EST_ST},
+		#{EST_FROM},#{TODAY_DIST},#{O_13},#{UDT_ST},#{OVER_RUN_AMT},
+		#{AGREE_DIST},#{CLS_PER},<!-- #{RENT_MNG_ID},#{RENT_L_CD}, -->#{RENT_ST,jdbcType=VARCHAR},
+		#{REG_CODE},#{INS_PER},#{OVER_SERV_AMT,jdbcType=INTEGER},#{CLS_N_PER,jdbcType=INTEGER},
+		#{OVER_RUN_DAY,jdbcType=INTEGER},#{ONE_SELF,jdbcType=CHAR},
+		<!-- #{DOC_TYPE},#{VALI_TYPE},#{optChk,jdbcType=VARCHAR}, -->
+		#{FEE_OPT_AMT,jdbcType=INTEGER},#{GI_PER},#{SET_CODE,jdbcType=VARCHAR},
+		#{EST_TYPE,jdbcType=CHAR},
+		#{CAROFF_EMP_YN,jdbcType=VARCHAR},#{PRINT_TYPE,jdbcType=VARCHAR},#{CTR_S_AMT,jdbcType=INTEGER},#{CTR_V_AMT,jdbcType=INTEGER},
+		#{USE_YN,jdbcType=VARCHAR},#{COMPARE_YN,jdbcType=VARCHAR},#{B_AGREE_DIST},
+		#{B_O_13,jdbcType=INTEGER},#{LOC_ST,jdbcType=VARCHAR},#{TINT_B_YN,jdbcType=VARCHAR},#{TINT_S_YN,jdbcType=VARCHAR},#{TINT_N_YN,jdbcType=VARCHAR},#{TINT_EB_YN,jdbcType=VARCHAR},
+		#{SPE_DC_PER},#{IN_COL,jdbcType=VARCHAR},#{BUS_YN,jdbcType=VARCHAR},#{BUS_CAU,jdbcType=VARCHAR},
+		#{ACCID_SERV_AMT1},#{ACCID_SERV_AMT2},#{ACCID_SERV_ZERO,jdbcType=VARCHAR},
+		#{INSURANT,jdbcType=VARCHAR},#{BUS_CAU_DT,jdbcType=DATE},#{CHA_ST_DT,jdbcType=VARCHAR},#{B_DIST,jdbcType=INTEGER},#{JG_OPT_ST,jdbcType=VARCHAR},
+		#{JG_COL_ST,jdbcType=VARCHAR},#{BUS_CAU_SCORE,jdbcType=INTEGER},#{MAX_USE_MON},#{TAX_DC_AMT,jdbcType=INTEGER},
+		#{ECAR_LOC_ST,jdbcType=VARCHAR},#{ECAR_PUR_SUB_AMT,jdbcType=INTEGER},#{ECAR_PUR_SUB_ST,jdbcType=VARCHAR},
+		#{TOT_DT,jdbcType=VARCHAR},	<!-- 확인일자 추가 -->
+		#{JG_TUIX_ST,jdbcType=VARCHAR},#{JG_TUIX_OPT_ST,jdbcType=VARCHAR},<!-- tuix 관련 값이 존재하면 insert 추가 (2017.07.07) -->
+		#{BR_TO,jdbcType=VARCHAR},#{BR_FROM,jdbcType=VARCHAR},#{BR_TO_ST,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<update id="calculateSecondhandAmt" statementType="CALLABLE" parameterType="hashmap">
+		{ call amazoncar.P_ESTI_SH_CAR_AMT
+			(
+			#{regCode, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{jgStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{emStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{eaStdDate, mode=IN, jdbcType=VARCHAR, javaType=string}
+			)
+		}
+	</update>
+
+	<update id="calculateSecondhandFee" statementType="CALLABLE" parameterType="hashmap">
+		{ call amazoncar.P_ESTI_SH_FEEAMT
+			(
+			#{regCode, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{jgStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{emStdDate, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{eaStdDate, mode=IN, jdbcType=VARCHAR, javaType=string}
+			)
+		}
+	</update>
+
+	<update id="cancelMonthRent" statementType="CALLABLE" parameterType="hashmap">
+		{ CALL amazoncar.P_SH_RES_DIRE_CANCEL
+			(
+			#{carManagedId, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{reserveSeq, mode=IN, jdbcType=VARCHAR, javaType=string},
+			#{sResult, mode=OUT, jdbcType=VARCHAR, javaType=string}
+			)
+		}
+	</update>
+
+	<select id="checkReserveRank" parameterType="string" resultType="string">
+		<![CDATA[
+			SELECT COUNT(*) 
+			FROM amazoncar.SH_RES
+			WHERE (USE_YN IS NULL OR USE_YN = 'Y')
+			AND CAR_MNG_ID = #{carManagedId}
+		]]>
+	</select>
+
+	<insert id="insertReserveInfo" parameterType="hashmap">
+		<!-- #{regDate} -->
+		INSERT INTO
+		amazoncar.SH_RES (
+		EST_ID,CAR_MNG_ID, SEQ, SITUATION,
+		MEMO, REG_DT,
+		CUST_NM,CUST_TEL,REG_CODE
+		)
+		( SELECT #{estId}, #{carManagedId}, TO_CHAR(LPAD(COUNT(*)+1,3,0)),
+		--001,002 형태가 되도록, 왼쪽에 0을 채워준다
+		'0',
+		'[월렌트]', TO_CHAR(SYSDATE, 'yyyyMMdd'),
+		#{estName}, #{estTel},#{regCode}
+		FROM amazoncar.SH_RES
+		WHERE CAR_MNG_ID = #{carManagedId}
+		)
+	</insert>
+
+	<select id="selectSmartDcAmt" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+					*
+			FROM ( 
+				SELECT 
+					a.car_comp_id, a.car_cd, a.car_b_dt, a.car_d_seq, a.car_d_p, a.car_d_per, b.car_b_p, a.ls_yn, a.car_d_per2, a.car_d_p2, a.car_d_per_b2, a.esti_d_etc,
+					decode(a.car_d_per, 0, a.car_d_p, (b.car_b_p/100*a.car_d_per)+car_d_p) new_car_d_p
+				FROM   
+					amazoncar.CAR_DC a, amazoncar.CAR_NM b
+				WHERE  a.car_comp_id=#{carCompId}
+					AND a.car_cd=#{carCode}
+					AND a.car_comp_id=b.car_comp_id AND a.car_cd=b.car_cd AND a.car_b_dt=b.car_b_dt
+					AND b.car_id=#{carId} AND b.car_seq=#{carSeq}
+					AND substr(a.car_d_dt,1,6)=to_char(sysdate,'YYYYMM')
+					AND nvl(a.car_d_dt2,to_char(sysdate,'YYYYMMDD')) >= to_char(sysdate,'YYYYMMDD')
+					AND TRIM(NVL(HP_FLAG,'Y')) <> 'N'
+				ORDER BY new_car_d_p, a.car_d_dt desc, a.car_d_seq )
+			WHERE ROWNUM = 1 
+		]]>
+	</select>
+
+	<select id="selectSmartCarDcEtc" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				a.car_comp_id, a.car_cd, a.car_b_dt, a.car_d_seq, a.car_d_p, a.car_d_per, a.ls_yn, a.car_d_per2, a.car_d_p2, a.car_d_per_b2, a.esti_d_etc
+			FROM   
+				amazoncar.CAR_DC a, amazoncar.CAR_NM b
+			WHERE  
+				a.car_comp_id=#{carCompId}
+				AND a.car_cd=#{carCode}
+				AND a.car_b_dt=#{carBdt}
+      			AND a.car_d_seq=#{carDseq}
+				AND a.car_comp_id=b.car_comp_id 
+				AND a.car_cd=b.car_cd 
+				AND a.car_b_dt=b.car_b_dt
+				AND b.car_id=#{carId} 
+				AND b.car_seq=#{carSeq}				
+				AND TRIM(NVL(HP_FLAG,'Y')) <> 'N'
+			ORDER BY 
+				a.car_d_p, a.car_d_dt desc, a.car_d_seq
+		]]>
+		<!-- AND substr(a.car_d_dt,1,6)=TO_CHAR(TO_DATE(#{rentDt}, 'YYYYMMDD'), 'YYYYMM')
+		AND nvl(a.car_d_dt2,TO_CHAR(TO_DATE(#{rentDt}, 'YYYYMMDD'), 'YYYYMMDD')) >= TO_CHAR(TO_DATE(#{rentDt}, 'YYYYMMDD'), 'YYYYMMDD')
+		AND ROWNUM = 1 -->
+	</select>
+
+	<select id="selectSmartDcAmt2" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				a.car_comp_id, a.car_cd, a.car_b_dt, a.car_d_seq, a.car_d_p, a.car_d_per, a.ls_yn, a.car_d_per2, a.car_d_p2, a.car_d_per_b2, a.esti_d_etc
+			FROM   
+				amazoncar.CAR_DC a, amazoncar.CAR_NM b
+			WHERE  
+				a.car_comp_id=#{carCompId}
+				AND a.car_cd=#{carCode}
+				AND a.car_comp_id=b.car_comp_id AND a.car_cd=b.car_cd AND a.car_b_dt=b.car_b_dt
+				AND b.car_id=#{carId} AND b.car_seq=#{carSeq}
+				AND substr(a.car_d_dt,1,6)=TO_CHAR(TO_DATE(#{rentDt}, 'YYYYMMDD'), 'YYYYMM')
+				AND nvl(a.car_d_dt2,TO_CHAR(TO_DATE(#{rentDt}, 'YYYYMMDD'), 'YYYYMMDD')) >= TO_CHAR(TO_DATE(#{rentDt}, 'YYYYMMDD'), 'YYYYMMDD')
+				AND ROWNUM = 1
+				AND TRIM(NVL(HP_FLAG,'Y')) <> 'N'
+			ORDER BY 
+				a.car_d_p, a.car_d_dt desc, a.car_d_seq
+		]]>
+	</select>
+
+	<insert id="insertEsimateInfoForMonth" parameterType="hashmap">
+		INSERT INTO amazoncar.ESTIMATE_CU ( EST_ID, EST_NM, EST_SSN, EST_TEL, EST_FAX, HP_KEY,
+		CAR_COMP_ID,CAR_CD,CAR_ID,CAR_SEQ,CAR_AMT,OPT,OPT_SEQ,OPT_AMT,COL,COL_SEQ,COL_AMT,DC,DC_SEQ,DC_AMT,O_1,
+		A_A,A_B,A_H,PP_ST,PP_AMT,PP_PER,RG_8,INS_GOOD,INS_AGE,INS_DJ,RO_13,G_10,CAR_JA,GI_AMT,GI_FEE,LPG_YN,GI_YN,GTR_AMT,
+		PP_S_AMT,PP_V_AMT,IFEE_S_AMT,IFEE_V_AMT,FEE_S_AMT,FEE_V_AMT,REG_ID,REG_DT,UPDATE_ID,UPDATE_DT,TALK_TEL,RO_13_AMT,RG_8_AMT,FEE_DC_PER,
+		SPR_YN,MGR_NM,MGR_SSN,JOB,RENT_DT,O_11,LPG_KIT,EST_ST,EST_FROM,TODAY_DIST,O_13,UDT_ST,OVER_RUN_AMT,AGREE_DIST,CLS_PER,RENT_MNG_ID,
+		RENT_L_CD,RENT_ST,REG_CODE,INS_PER,OVER_SERV_AMT,CLS_N_PER,OVER_RUN_DAY,ONE_SELF,DOC_TYPE,VALI_TYPE,OPT_CHK,FEE_OPT_AMT,GI_PER,
+		SET_CODE,EST_EMAIL,EST_TYPE,CAROFF_EMP_YN,PRINT_TYPE,CTR_S_AMT,CTR_V_AMT,USE_YN,COMPARE_YN,B_AGREE_DIST,B_O_13,LOC_ST,
+		TINT_B_YN,TINT_S_YN,TINT_N_YN,TINT_EB_YN,SPE_DC_PER,IN_COL,BUS_YN,BUS_CAU,ACCID_SERV_AMT1,ACCID_SERV_AMT2,ACCID_SERV_ZERO,INSURANT,
+		BUS_CAU_DT,CHA_ST_DT,B_DIST,JG_OPT_ST,JG_COL_ST,BUS_CAU_SCORE,MAX_USE_MON,TAX_DC_AMT,ECAR_LOC_ST,ECAR_PUR_SUB_AMT,ECAR_PUR_SUB_ST,CONTI_RAT
+		)
+		SELECT #{estimateId},#{estName},'',#{estTel},'', #{hpKey},
+		CAR_COMP_ID,CAR_CD,CAR_ID,CAR_SEQ,CAR_AMT,OPT,OPT_SEQ,OPT_AMT,COL,COL_SEQ,COL_AMT,DC,DC_SEQ,DC_AMT,O_1,
+		A_A,A_B,A_H,PP_ST,PP_AMT,PP_PER,RG_8,INS_GOOD,INS_AGE,INS_DJ,RO_13,G_10,CAR_JA,GI_AMT,GI_FEE,LPG_YN,GI_YN,GTR_AMT,
+		PP_S_AMT,PP_V_AMT,IFEE_S_AMT,IFEE_V_AMT,FEE_S_AMT,FEE_V_AMT,REG_ID,TO_CHAR(sysdate,'yyyymmdd'),UPDATE_ID,TO_CHAR(sysdate,'yyyymmdd'),TALK_TEL,RO_13_AMT,RG_8_AMT,FEE_DC_PER,
+		SPR_YN,MGR_NM,MGR_SSN,JOB,RENT_DT,O_11,LPG_KIT,EST_ST,EST_FROM,TODAY_DIST,O_13,UDT_ST,OVER_RUN_AMT,AGREE_DIST,CLS_PER,RENT_MNG_ID,
+		RENT_L_CD,RENT_ST,#{regCode},INS_PER,OVER_SERV_AMT,CLS_N_PER,OVER_RUN_DAY,ONE_SELF,DOC_TYPE,VALI_TYPE,OPT_CHK,FEE_OPT_AMT,GI_PER,
+		#{regCode},#{estEmail},EST_TYPE,CAROFF_EMP_YN,PRINT_TYPE,CTR_S_AMT,CTR_V_AMT,USE_YN,COMPARE_YN,B_AGREE_DIST,B_O_13,LOC_ST,
+		TINT_B_YN,TINT_S_YN,TINT_N_YN,TINT_EB_YN,SPE_DC_PER,IN_COL,BUS_YN,BUS_CAU,ACCID_SERV_AMT1,ACCID_SERV_AMT2,ACCID_SERV_ZERO,INSURANT,
+		BUS_CAU_DT,CHA_ST_DT,B_DIST,JG_OPT_ST,JG_COL_ST,BUS_CAU_SCORE,MAX_USE_MON,TAX_DC_AMT,ECAR_LOC_ST,ECAR_PUR_SUB_AMT,ECAR_PUR_SUB_ST,CONTI_RAT
+		FROM amazoncar.ESTIMATE_SH
+		WHERE REG_CODE = #{estCode}
+		AND MGR_NM = #{carManagedId}
+		AND MGR_SSN = 'rm1'
+		AND ROWNUM = 1
+		AND EST_TYPE = 'S'
+	</insert>
+
+	<insert id="insertEsimateExamForMonth" parameterType="hashmap">
+		INSERT INTO
+		amazoncar.ESTI_EXAM_CU ( EST_ID,O_B, O_C, O_D, O_E, O_F, O_G1, O_G2, O_G,
+		O_H, DAY, O_I, O_K, O_M, BM7, BM9, BM10, BM12, BM14,
+		A_G, O_3, O_3_R, S_A, BC_S_F, BC_S_I, S_C, S_D, S_D_R, O_4, S_E, S_G, S_H,
+		S_J, S_K, S_M, S_Q, S_R, S_S, S_V, AX_N_AMT, S_W,
+		K_N, K_R,J_J,J_CH,J_C,K_R_R,K_TT,K_TT_R, K_CH_R,
+		C_S, C_S_R, G_6, G_6_R, G_7, G_7_R, K_T, K_T_R,
+		K_P, K_P_R, K_H, K_MM, K_BB, K_CC, K_JD, K_MO, K_SO,
+		K_WO, AX81, O_F_R, O_R, O_R_R, O_S_R, O_T, O_S,
+		O_U, O_V, O_W, O_X, O_Y, BK60, BK61, K_SU_11, K_SU_12, K_SU_4, K_CB_3,
+		AX110, AX117,
+		ADD_O_13, AX116, AX117_B, AX117_S, AX117_N, ACCID_SIK_J, BK_128, BK_129,
+		JG_G_7, JG_W, BC_CR21
+		)
+		SELECT #{estimateId}, O_B, O_C, O_D, O_E, O_F, O_G1, O_G2, O_G,
+		O_H, DAY, O_I, O_K, O_M, BM7, BM9, BM10, BM12, BM14,
+		A_G, O_3, O_3_R, S_A, BC_S_F, BC_S_I, S_C, S_D, S_D_R, O_4, S_E, S_G, S_H,
+		S_J, S_K, S_M, S_Q, S_R, S_S, S_V, AX_N_AMT, S_W,
+		K_N, K_R,J_J,J_CH,J_C,K_R_R,K_TT,K_TT_R, K_CH_R,
+		C_S, C_S_R, G_6, G_6_R, G_7, G_7_R, K_T, K_T_R,
+		K_P, K_P_R, K_H, K_MM, K_BB, K_CC, K_JD, K_MO, K_SO,
+		K_WO, AX81, O_F_R, O_R, O_R_R, O_S_R, O_T, O_S,
+		O_U, O_V, O_W, O_X, O_Y, BK60, BK61, K_SU_11, K_SU_12, K_SU_4, K_CB_3,
+		AX110, AX117,
+		ADD_O_13, AX116, AX117_B, AX117_S, AX117_N, ACCID_SIK_J, BK_128, BK_129,
+		JG_G_7, JG_W, BC_CR21
+		FROM amazoncar.ESTI_EXAM_SH
+		WHERE EST_ID = (
+		SELECT EST_ID
+		FROM amazoncar.ESTIMATE_SH
+		WHERE REG_CODE = #{estCode}
+		AND MGR_NM = #{carManagedId}
+		AND MGR_SSN = 'rm1'
+		AND ROWNUM = 1
+		AND EST_TYPE = 'S'
+		)
+	</insert>
+
+	<update id="updateRoAmt" parameterType="hashmap">
+		UPDATE amazoncar.ESTIMATE_CU
+		SET RO_13 = #{roPer}, RO_13_AMT = #{roAmt}
+		WHERE EST_ID = #{estimateId}
+		AND JOB = 'org'
+	</update>
+
+	<select id="selectSecondhandDepositInfo" parameterType="hashmap"
+		resultType="hashmap">
+	<![CDATA[
+	  SELECT  DISTINCT RG_8, RG_8_AMT
+        FROM  amazoncar.ESTIMATE_SH
+       WHERE  REG_CODE = #{REG_CODE, jdbcType=VARCHAR}
+         AND  RG_8 <> 0
+         AND  RG_8_AMT <> 0
+         AND  CAR_COMP_ID = #{CAR_COMP_ID, jdbcType=VARCHAR}
+         AND  CAR_CD = #{CAR_CD, jdbcType=VARCHAR}
+         AND  SET_CODE = #{SET_CODE, jdbcType=VARCHAR}
+    ]]>
+	</select>
+
+	<delete id="deleteDriverInfo" parameterType="String">
+		DELETE FROM amazoncar.ESTI_MGR
+		WHERE EST_ID = #{estimateId}
+	</delete>
+
+	<insert id="insertEsimateInfoForSimple" parameterType="hashmap">
+		<!-- #{regSysDate} -->
+		INSERT INTO
+		amazoncar.ESTIMATE_CU (
+		EST_ID,EST_NM,EST_SSN,EST_TEL,EST_FAX,HP_KEY,
+		REG_CODE,SET_CODE,JOB,A_B,PRINT_TYPE,
+		CAR_COMP_ID,CAR_CD,CAR_ID,CAR_SEQ,CAR_AMT,OPT,OPT_SEQ,OPT_AMT,COL,
+		COL_SEQ,COL_AMT,DC,DC_SEQ,DC_AMT,O_1,A_A,A_H,PP_ST,PP_AMT,PP_PER,RG_8,INS_GOOD,INS_AGE,INS_DJ,RO_13,
+		G_10,CAR_JA,GI_AMT,GI_FEE,LPG_YN,GI_YN,GTR_AMT,PP_S_AMT,PP_V_AMT,IFEE_S_AMT,IFEE_V_AMT,FEE_S_AMT,FEE_V_AMT,
+		REG_ID,REG_DT,UPDATE_ID,UPDATE_DT,TALK_TEL,RO_13_AMT,RG_8_AMT,FEE_DC_PER,SPR_YN,MGR_NM,MGR_SSN,RENT_DT,
+		O_11,LPG_KIT,EST_ST,EST_FROM,TODAY_DIST,O_13,UDT_ST,OVER_RUN_AMT,AGREE_DIST,CLS_PER,RENT_MNG_ID,RENT_L_CD,
+		RENT_ST,INS_PER,OVER_SERV_AMT,CLS_N_PER,OVER_RUN_DAY,ONE_SELF,DOC_TYPE,VALI_TYPE,OPT_CHK,FEE_OPT_AMT,
+		GI_PER,EST_EMAIL,EST_TYPE,CAROFF_EMP_YN,CTR_S_AMT,CTR_V_AMT,USE_YN,COMPARE_YN,B_AGREE_DIST,
+		B_O_13,LOC_ST,TINT_B_YN,TINT_S_YN,TINT_N_YN,TINT_EB_YN,SPE_DC_PER,IN_COL,BUS_YN,BUS_CAU,ACCID_SERV_AMT1,ACCID_SERV_AMT2,
+		ACCID_SERV_ZERO,INSURANT,BUS_CAU_DT,CHA_ST_DT,B_DIST,JG_OPT_ST,JG_COL_ST,BUS_CAU_SCORE,MAX_USE_MON,TAX_DC_AMT,
+		ECAR_LOC_ST,ECAR_PUR_SUB_AMT,ECAR_PUR_SUB_ST,CONTI_RAT,DRIVER_ADD_AMT,
+		RETURN_SELECT, HCAR_LOC_ST
+		)
+		SELECT #{estimateId},#{estName},'',#{estTel},#{estFax, jdbcType=VARCHAR},#{hpKey, jdbcType=VARCHAR},
+		#{regCode},#{setCode},#{job},#{a_b},#{print_type},
+		CAR_COMP_ID,CAR_CD,CAR_ID,CAR_SEQ,CAR_AMT,OPT,OPT_SEQ,OPT_AMT,COL,
+		COL_SEQ,COL_AMT,DC,DC_SEQ,DC_AMT,O_1,A_A,A_H,PP_ST,PP_AMT,PP_PER,RG_8,INS_GOOD,INS_AGE,INS_DJ,RO_13,
+		G_10,CAR_JA,GI_AMT,GI_FEE,LPG_YN,GI_YN,GTR_AMT,PP_S_AMT,PP_V_AMT,IFEE_S_AMT,IFEE_V_AMT,FEE_S_AMT,FEE_V_AMT,
+		REG_ID,TO_CHAR(SYSDATE, 'yyyyMMddHH24MI'),UPDATE_ID,TO_CHAR(SYSDATE, 'yyyyMMdd'),TALK_TEL,RO_13_AMT,RG_8_AMT,FEE_DC_PER,SPR_YN,MGR_NM,MGR_SSN,RENT_DT,
+		O_11,LPG_KIT,EST_ST,EST_FROM,TODAY_DIST,O_13,UDT_ST,OVER_RUN_AMT,AGREE_DIST,CLS_PER,RENT_MNG_ID,RENT_L_CD,
+		RENT_ST,INS_PER,OVER_SERV_AMT,CLS_N_PER,OVER_RUN_DAY,ONE_SELF,DOC_TYPE,VALI_TYPE,OPT_CHK,FEE_OPT_AMT,
+		GI_PER,EST_EMAIL,EST_TYPE,CAROFF_EMP_YN,CTR_S_AMT,CTR_V_AMT,USE_YN,COMPARE_YN,B_AGREE_DIST,
+		B_O_13,LOC_ST,TINT_B_YN,TINT_S_YN,TINT_N_YN,TINT_EB_YN,SPE_DC_PER,IN_COL,BUS_YN,BUS_CAU,ACCID_SERV_AMT1,ACCID_SERV_AMT2,
+		ACCID_SERV_ZERO,INSURANT,BUS_CAU_DT,CHA_ST_DT,B_DIST,JG_OPT_ST,JG_COL_ST,BUS_CAU_SCORE,MAX_USE_MON,TAX_DC_AMT,
+		ECAR_LOC_ST,ECAR_PUR_SUB_AMT,ECAR_PUR_SUB_ST,CONTI_RAT,DRIVER_ADD_AMT,
+		RETURN_SELECT, HCAR_LOC_ST
+		FROM amazoncar.ESTIMATE_HP
+		WHERE EST_ID = #{estId}
+	</insert>
+	
+	<insert id="insertSecondhandEsimateInfoForSimple" parameterType="hashmap">
+		<!-- #{regSysDate} -->
+		INSERT INTO
+		amazoncar.ESTIMATE_CU (
+		EST_ID,EST_NM,EST_SSN,EST_TEL,EST_FAX,
+		CAR_COMP_ID,CAR_CD,CAR_ID,CAR_SEQ,CAR_AMT,OPT,OPT_SEQ,OPT_AMT,COL,
+		COL_SEQ,COL_AMT,DC,DC_SEQ,DC_AMT,O_1,A_A,A_B,A_H,PP_ST,PP_AMT,PP_PER,RG_8,INS_GOOD,INS_AGE,INS_DJ,RO_13,
+		G_10,CAR_JA,GI_AMT,GI_FEE,LPG_YN,GI_YN,GTR_AMT,PP_S_AMT,PP_V_AMT,IFEE_S_AMT,IFEE_V_AMT,FEE_S_AMT,FEE_V_AMT,
+		REG_ID,REG_DT,UPDATE_ID,UPDATE_DT,TALK_TEL,RO_13_AMT,RG_8_AMT,FEE_DC_PER,SPR_YN,MGR_NM,MGR_SSN,JOB,RENT_DT,
+		O_11,LPG_KIT,EST_ST,EST_FROM,TODAY_DIST,O_13,UDT_ST,OVER_RUN_AMT,AGREE_DIST,CLS_PER,RENT_MNG_ID,RENT_L_CD,RENT_ST,
+		REG_CODE,
+		INS_PER,OVER_SERV_AMT,CLS_N_PER,OVER_RUN_DAY,ONE_SELF,DOC_TYPE,VALI_TYPE,OPT_CHK,FEE_OPT_AMT,GI_PER,
+		SET_CODE,
+		EST_EMAIL,EST_TYPE,CAROFF_EMP_YN,PRINT_TYPE,CTR_S_AMT,CTR_V_AMT,USE_YN,COMPARE_YN,B_AGREE_DIST,
+		B_O_13,LOC_ST,TINT_B_YN,TINT_S_YN,TINT_N_YN,TINT_EB_YN,SPE_DC_PER,IN_COL,BUS_YN,BUS_CAU,ACCID_SERV_AMT1,ACCID_SERV_AMT2,
+		ACCID_SERV_ZERO,INSURANT,BUS_CAU_DT,CHA_ST_DT,B_DIST,JG_OPT_ST,JG_COL_ST,BUS_CAU_SCORE,MAX_USE_MON,TAX_DC_AMT,
+		ECAR_LOC_ST,ECAR_PUR_SUB_AMT,ECAR_PUR_SUB_ST,CONTI_RAT,DRIVER_ADD_AMT,HP_KEY, BR_TO, BR_FROM, BR_TO_ST
+		)
+		SELECT #{estimateId},#{estName},'',#{estTel},#{estFax, jdbcType=VARCHAR},
+		CAR_COMP_ID,CAR_CD,CAR_ID,CAR_SEQ,CAR_AMT,OPT,OPT_SEQ,OPT_AMT,COL,
+		COL_SEQ,COL_AMT,DC,DC_SEQ,DC_AMT,O_1,A_A,A_B,A_H,PP_ST,PP_AMT,PP_PER,RG_8,INS_GOOD,INS_AGE,INS_DJ,RO_13,
+		G_10,CAR_JA,GI_AMT,GI_FEE,LPG_YN,GI_YN,GTR_AMT,PP_S_AMT,PP_V_AMT,IFEE_S_AMT,IFEE_V_AMT,FEE_S_AMT,FEE_V_AMT,
+		REG_ID,TO_CHAR(SYSDATE, 'yyyyMMddHH24MI'),UPDATE_ID,TO_CHAR(SYSDATE, 'yyyyMMdd'),TALK_TEL,RO_13_AMT,RG_8_AMT,FEE_DC_PER,SPR_YN,MGR_NM,MGR_SSN,JOB,RENT_DT,
+		O_11,LPG_KIT,EST_ST,EST_FROM,TODAY_DIST,O_13,UDT_ST,OVER_RUN_AMT,AGREE_DIST,CLS_PER,RENT_MNG_ID,RENT_L_CD,RENT_ST,
+		#{regCode},
+		INS_PER,OVER_SERV_AMT,CLS_N_PER,OVER_RUN_DAY,ONE_SELF,DOC_TYPE,VALI_TYPE,OPT_CHK,FEE_OPT_AMT,GI_PER,
+		#{setCode},
+		EST_EMAIL,EST_TYPE,CAROFF_EMP_YN,PRINT_TYPE,CTR_S_AMT,CTR_V_AMT,USE_YN,COMPARE_YN,B_AGREE_DIST,
+		B_O_13,LOC_ST,TINT_B_YN,TINT_S_YN,TINT_N_YN,TINT_EB_YN,SPE_DC_PER,IN_COL,BUS_YN,BUS_CAU,ACCID_SERV_AMT1,ACCID_SERV_AMT2,
+		ACCID_SERV_ZERO,INSURANT,BUS_CAU_DT,CHA_ST_DT,B_DIST,JG_OPT_ST,JG_COL_ST,BUS_CAU_SCORE,MAX_USE_MON,TAX_DC_AMT,
+		ECAR_LOC_ST,ECAR_PUR_SUB_AMT,ECAR_PUR_SUB_ST,CONTI_RAT,DRIVER_ADD_AMT,#{hpKey, jdbcType=VARCHAR},#{brTo, jdbcType=VARCHAR},#{brFrom, jdbcType=VARCHAR},#{br_to_st, jdbcType=VARCHAR}
+		FROM amazoncar.ESTIMATE_SH
+		WHERE EST_ID = #{estId}
+	</insert>
+	
+	<!-- 사전예약 -->
+	<insert id="insertCustomerDiscountInfo" parameterType="hashmap">
+		<!-- #{reg_dt} -->
+		<![CDATA[
+			INSERT INTO amazoncar.ESTI_SPE
+					(
+						 EST_ID, EST_ST, EST_NM, ETC,
+						 EST_AREA, EST_TEL, CAR_NM, 
+						 REG_DT
+					)
+					VALUES 
+					(
+					   	  #{est_id}, #{est_st}, #{est_nm}, #{etc},
+					   	  #{estArea}, #{est_tel}, #{car_nm}, 
+					   	  TO_CHAR(SYSDATE, 'yyyyMMddHH24MI')
+					)
+		]]>
+	</insert>
+	
+	<!-- 사전예약 -->
+	<insert id="insertCustomerReserveInfo-simple" parameterType="hashmap">
+		<!-- #{reg_dt} -->
+		<![CDATA[
+			INSERT INTO amazoncar.ESTI_SPE
+					(
+						 EST_ID, EST_ST, EST_NM,
+						 EST_AREA, EST_TEL, CAR_NM, 
+						 REG_DT
+					)
+					VALUES 
+					(
+					   	  #{est_id}, #{est_st}, #{est_nm}, 
+					   	  #{estArea}, #{est_tel}, #{car_nm}, 
+					   	  TO_CHAR(SYSDATE, 'yyyyMMddHH24MI')
+					)
+		]]>
+	</insert>
+	
+	<!-- 간편상담 -->
+	<insert id="insertCustomerInfo-simple2" parameterType="hashmap">
+		<!-- #{reg_dt} -->
+		<![CDATA[
+			INSERT INTO amazoncar.ESTI_SPE
+					(
+						 EST_ID, EST_ST, EST_NM, ETC,
+						 EST_AREA, EST_TEL, 
+						 REG_DT, 
+						 EST_EMAIL, HP_KEY
+					)
+					VALUES 
+					(
+					   	  #{est_id}, #{estGubun}, #{estName}, #{etc}, 
+					   	  #{estArea}, #{estTel}, 
+					   	  TO_CHAR(SYSDATE, 'yyyyMMddHH24MI'), 
+					   	  #{estEmail, jdbcType=VARCHAR}, #{hpKey, jdbcType=VARCHAR}
+					)
+		]]>
+	</insert>
+	
+	<insert id="insertCustomerInfo-simple" parameterType="hashmap">
+		<!-- #{regSysDate} -->
+		<![CDATA[
+			INSERT INTO amazoncar.ESTI_SPE
+					(
+						 EST_ID, EST_ST, EST_NM, EST_SSN,
+						 EST_AREA, EST_TEL, EST_FAX, EST_EMAIL, HP_KEY,
+						 CAR_NM, ETC, 
+						 REG_DT, 
+						 CLIENT_YN,
+						 BR_TO, BR_FROM, BR_TO_ST
+					)
+					VALUES 
+					(
+					   	  #{estimateId}, #{estGubun}, #{estName}, #{estSSN}, 
+					   	  #{estArea}, #{estTel},
+					   	  #{estFax, jdbcType=VARCHAR},#{estEmail, jdbcType=VARCHAR}, #{hpKey, jdbcType=VARCHAR},
+					   	  #{carName}, #{etc, jdbcType=VARCHAR}, 
+					   	  TO_CHAR(SYSDATE, 'yyyyMMddHH24MI'), 
+					   	  #{client_yn,jdbcType=VARCHAR},
+					   	  #{brTo,jdbcType=VARCHAR}, #{brFrom,jdbcType=VARCHAR}, #{br_to_st,jdbcType=VARCHAR}
+					)
+		]]>
+	</insert>
+	
+	<!-- 수입차이면 INS_PER 값을 2로 세팅(수입차 보험미포함, 견적불가 -> 가능하게 처리, 2017.06.01) -->
+	<update id="updateInsPerSetting" parameterType="hashmap">
+	
+		UPDATE 
+			amazoncar.ESTIMATE_CU 
+		SET 
+			INS_PER = '2'
+		WHERE 
+			REG_CODE = #{regCode} 
+	
+	</update>
+	
+	<!--  월렌트 예약시  예약 기간 가져오기 -->
+	<select id="selectReservePeriod" parameterType="hashmap" resultType="hashmap">
+	
+		SELECT 
+			RES_ST_DT,
+		    RES_END_DT
+		FROM 
+			amazoncar.SH_RES
+		WHERE 
+			CAR_MNG_ID = #{carManagedId}
+		    AND SEQ = #{resSeq}
+	
+	</select> 
+	
+	<!-- 정부,지자체 보조금 계산을 위해 프로시져 최근 구동일을 fetch (2018.01.12) -->
+	<select id="getBDt" resultType="String">
+		<![CDATA[
+		
+		SELECT max(a_j) b_dt FROM   amazoncar.esti_comm_var  where a_a='1' and a_j <= to_char(sysdate,'YYYYMMDD')
+		
+		]]>
+	</select>
+	
+	<!-- 정부,지자체 보조금 계산을 위해 기본데이터를 fetch (2018.01.12) -->
+	<select id="getSubsidyData" parameterType="hashmap" resultType="hashmap">
+	
+		<!-- SELECT * FROM esti_comm_var WHERE a_a = #{a_a} AND a_j = #{b_dt} -->
+		SELECT * FROM amazoncar.esti_comm_var 
+		WHERE 
+			a_a = #{a_a} 
+			AND a_j = #{b_dt} 
+			AND seq = (select MAX(seq) FROM amazoncar.ESTI_COMM_VAR where a_a = #{a_a} AND a_j = #{b_dt})
+		
+	</select>
+	
+	<!-- ESTI_EXAM_CU 테이블 1건 조회 -->
+	<select id="getEstiExamCu" parameterType="String" resultType="hashmap">
+	
+		SELECT * FROM amazoncar.ESTI_EXAM_CU WHERE EST_ID = #{estimateId}
+		
+	</select>
+	
+	<!-- ESTI_EXAM_HP 테이블 1건 조회 -->
+	<select id="getEstiExamHp" parameterType="String" resultType="hashmap">
+	
+		SELECT * FROM amazoncar.ESTI_EXAM_HP WHERE EST_ID = #{estimateId}
+		
+	</select>
+	
+	<!-- ESTIMATE_CU 테이블 조회 -->
+	<select id="getEstimateCu" parameterType="String" resultType="hashmap">
+	
+		SELECT * FROM amazoncar.ESTIMATE_CU WHERE EST_ID = #{estimateId}
+		
+	</select>
+	
+	<!-- 정부 보조금 조회 -->
+	<select id="getBk128" parameterType="hashmap" resultType="int">
+	
+		SELECT
+			c.BK_128
+		FROM
+			amazoncar.car_nm a,
+			amazoncar.estimate b,
+			amazoncar.esti_exam c
+		WHERE
+			a.car_id = b.car_id
+			AND a.car_seq = b.car_seq
+			AND b.est_id = c.est_id
+			AND a.car_id = #{carId}
+			AND a.car_seq = #{carSeq}
+			AND rownum = 1
+		
+	</select>
+	
+</mapper>
